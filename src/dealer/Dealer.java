@@ -14,7 +14,7 @@ public class Dealer extends HttpServlet{
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.getOutputStream().print("{Die Now.}");
 	}
-
+ 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		resp.getOutputStream().print("{Die Now.Post}");
