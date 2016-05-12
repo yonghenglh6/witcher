@@ -37,15 +37,13 @@ public class MicrosoftAcademicClient {
 	}
 
 	private static CloseableHttpClient createSSLClientDefault() {
-
 		try {
-
 			SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
 				// 信任所有
-				public boolean isTrusted(X509Certificate[] chain,
-						String authType) throws CertificateException {
+				public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
 					return true;
 				}
+
 				@Override
 				public boolean isTrusted(java.security.cert.X509Certificate[] arg0, String arg1)
 						throws java.security.cert.CertificateException {
@@ -71,28 +69,26 @@ public class MicrosoftAcademicClient {
 			e.printStackTrace();
 
 		}
-
 		return HttpClients.createDefault();
 
 	}
-
 	private MicrosoftAcademicClient() {
 
 	}
-	public static String encodeParam(String param){
+	public static String encodeParam(String param) {
 		try {
-			return java.net.URLEncoder.encode(param,"utf-8");
+			return java.net.URLEncoder.encode(param, "utf-8");
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return "";
 	}
+
 	public String get(String url) {
 		CloseableHttpClient httpclient = createSSLClientDefault();
 		HttpGet httpGet = new HttpGet();
 		try {
-			httpGet.setHeader("Ocp-Apim-Subscription-Key", "aa006460ea674d9287b2302218969fc8");
+			httpGet.setHeader("Ocp-Apim-Subscription-Key", KEY1);
 			httpGet.setURI(new URI(url));
 		} catch (URISyntaxException e1) {
 			e1.printStackTrace();
@@ -123,29 +119,41 @@ public class MicrosoftAcademicClient {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+			if(httpclient!=null)
+				try {
+					httpclient.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 		}
 		return result;
 	}
-	public String get(String baseUrl,Map<String,String> params){
-		String url=baseUrl+"?";
-		for(String key:params.keySet()){
-			
+
+	public static final String URL_EVALUATE = "https://api.projectoxford.ai/academic/v1.0/evaluate";
+	public static final String URL_CALCHISTOGRAM = "https://api.projectoxford.ai/academic/v1.0/calchistogram";
+	public static final String URL_INTERPRET = "https://api.projectoxford.ai/academic/v1.0/interpret";
+	private static final String KEY1 = "aa006460ea674d9287b2302218969fc8";
+	private static final String KEY2 = "b23b122400e04defa8d330567cb04f7b";
+
+	public String get(String baseUrl, Map<String, String> params) {
+		String url = baseUrl + "?";
+		for (String key : params.keySet()) {
+			String value = encodeParam(params.get(key));
+			url += key + "=" + value + "&";
 		}
-		return null;
+		System.out.println("fetch from:"+url);
+		return get(url);
 	}
-	
-	public static void main(String args[]){
-		String baseUrl="https://api.projectoxford.ai/academic/v1.0/evaluate?";
-		String params= "expr=Composite(AA.AuN=='jaime teevan')&count=2&attributes=Ti,Y,CC,AA.AuN,AA.AuId";
-		try {
-			String para=java.net.URLEncoder.encode("Composite(AA.AuN=='jaime teevan')","utf-8");
-			params="expr="+para+"&count=2&attributes=Ti,Y,CC,AA.AuN,AA.AuId";
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-		System.out.println(params);
-		String url=baseUrl+params;
-		String rs1 = MicrosoftAcademicClient.getInstance().get(url);
+
+	public static void main(String args[]) {
+
+		Map<String, String> pm = new HashMap<String, String>();
+		pm.put("expr", "Composite(AA.AuN=='jaime teevan')");
+		pm.put("count", "2");
+		pm.put("attributes", "Ti,Y,CC,AA.AuN,AA.AuId");
+
+		String rs1 = MicrosoftAcademicClient.getInstance().get(URL_EVALUATE, pm);
+		System.out.println("result:");
 		System.out.println(rs1);
 	}
 }
