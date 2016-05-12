@@ -7,6 +7,9 @@ import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.SSLContext;
 import javax.security.cert.CertificateException;
@@ -76,7 +79,15 @@ public class MicrosoftAcademicClient {
 	private MicrosoftAcademicClient() {
 
 	}
-
+	public static String encodeParam(String param){
+		try {
+			return java.net.URLEncoder.encode(param,"utf-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "";
+	}
 	public String get(String url) {
 		CloseableHttpClient httpclient = createSSLClientDefault();
 		HttpGet httpGet = new HttpGet();
@@ -113,19 +124,26 @@ public class MicrosoftAcademicClient {
 					e.printStackTrace();
 				}
 		}
-
 		return result;
 	}
-
+	public String get(String baseUrl,Map<String,String> params){
+		String url=baseUrl+"?";
+		for(String key:params.keySet()){
+			
+		}
+		return null;
+	}
+	
 	public static void main(String args[]){
 		String baseUrl="https://api.projectoxford.ai/academic/v1.0/evaluate?";
 		String params= "expr=Composite(AA.AuN=='jaime teevan')&count=2&attributes=Ti,Y,CC,AA.AuN,AA.AuId";
 		try {
-			params=java.net.URLEncoder.encode(params,"utf-8");
+			String para=java.net.URLEncoder.encode("Composite(AA.AuN=='jaime teevan')","utf-8");
+			params="expr="+para+"&count=2&attributes=Ti,Y,CC,AA.AuN,AA.AuId";
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println(params);
 		String url=baseUrl+params;
 		String rs1 = MicrosoftAcademicClient.getInstance().get(url);
 		System.out.println(rs1);
