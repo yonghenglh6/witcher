@@ -38,8 +38,6 @@ public class TestSearch {
 		long ID=1511277043L;
 		long AFID=97018004L;
 		SearchWrapper.search(TYPE.AA_AuId, AID, TYPE.Id, ID);
-		
-		
 	}
 	public static void AuId2Id(){
 		AuId2Id1hop();

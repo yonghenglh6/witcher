@@ -50,14 +50,22 @@ public class Dealer extends HttpServlet {
 			List<String> list4 = SearchWrapper.search(TYPE.AA_AuId, id1, TYPE.AA_AuId, id2);
 
 			List<String> mrs = new ArrayList<String>();
-			if (list1 != null)
+			if (list1 != null){
 				mrs.addAll(list1);
-			if (list2 != null)
+				System.out.println("id2id:"+list1.size());
+			}
+			if (list2 != null){
 				mrs.addAll(list2);
-			if (list3 != null)
+				System.out.println("auid2id:"+list2.size());
+			}
+			if (list3 != null){
 				mrs.addAll(list3);
-			if (list4 != null)
+				System.out.println("id2auid:"+list3.size());
+			}
+			if (list4 != null){
 				mrs.addAll(list4);
+				System.out.println("auid2auid:"+list4.size());
+			}
 
 			String rs = "[";
 			boolean first = true;
