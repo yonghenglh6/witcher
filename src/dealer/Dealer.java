@@ -24,7 +24,7 @@ public class Dealer extends HttpServlet {
 				out+=value + ",";
 			}
 			out+="].\n";
-			FileWriter fw=new FileWriter(new File("d:/input.txt"));
+			FileWriter fw=new FileWriter("d:/input.txt",true);
 			fw.append(out);
 			fw.flush();
 			fw.close();
