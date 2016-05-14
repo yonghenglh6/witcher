@@ -3,6 +3,7 @@ package dealer;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,40 +32,49 @@ public class Dealer extends HttpServlet {
 
 		}
 		FileWriter fw = new FileWriter("d:/input.txt", true);
-		fw.append(out+"\n======");
+		fw.append(out + "\n======");
 		fw.flush();
 		fw.close();
+
 		try {
-			String id1str = pmaps.get("id1")[0];
-			String id2str = pmaps.get("id2")[0];
+			String id1str = "2251253715", id2str = "2180737804";
+			if (pmaps.get("id1") != null)
+				id1str = pmaps.get("id1")[0];
+			if (pmaps.get("id2") != null)
+				id2str = pmaps.get("id2")[0];
 			long id1 = Long.valueOf(id1str);
 			long id2 = Long.valueOf(id2str);
 			List<String> list1 = SearchWrapper.search(TYPE.Id, id1, TYPE.Id, id2);
 			List<String> list2 = SearchWrapper.search(TYPE.AA_AuId, id1, TYPE.Id, id2);
 			List<String> list3 = SearchWrapper.search(TYPE.Id, id1, TYPE.AA_AuId, id2);
 			List<String> list4 = SearchWrapper.search(TYPE.AA_AuId, id1, TYPE.AA_AuId, id2);
-			if(list2!=null)
-			list1.addAll(list2);
-			if(list3!=null)
-			list1.addAll(list3);
-			if(list4!=null)
-			list1.addAll(list4);
+
+			List<String> mrs = new ArrayList<String>();
+			if (list1 != null)
+				mrs.addAll(list1);
+			if (list2 != null)
+				mrs.addAll(list2);
+			if (list3 != null)
+				mrs.addAll(list3);
+			if (list4 != null)
+				mrs.addAll(list4);
+
 			String rs = "[";
 			boolean first = true;
-			for (String tts : list1) {
+			for (String tts : mrs) {
 				if (first) {
 					first = false;
-					rs+=tts;
+					rs += tts;
 				} else {
-					rs+=","+tts;
+					rs += "," + tts;
 				}
 			}
-			rs+="]";
+			rs += "]";
 			resp.getOutputStream().print(rs);
 		} catch (Exception e) {
 			e.printStackTrace();
+			resp.getOutputStream().print("[]");
 		}
-		resp.getOutputStream().print("[]");
 	}
 
 	@Override

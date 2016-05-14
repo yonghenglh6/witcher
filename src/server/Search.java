@@ -106,7 +106,7 @@ public class Search {
 		// 2-hop Id->AuId->Id
 		List<Long> AuId1 = Id1.getAuId();
 		List<Long> AuId2 = Id2.getAuId();
-		if (AuId2 != null && AuId2 != null) {
+		if (AuId1 != null && AuId2 != null) {
 			for (int i = 0; i < AuId1.size(); i++) {
 				if (-1 != AuId2.indexOf(AuId1.get(i))) {
 					System.out.println("[" + head + "," + AuId1.get(i) + "," + tail + "]");
@@ -134,13 +134,13 @@ public class Search {
 			expr = Or(expr, "Id=" + RId1.get(i));
 		}
 		System.out.println(expr);
-		json = MicrosoftAcademicAPI.evaluateMethod(expr, paras);
-		List<Entity> referenceOfId1 = Entities.getEntityList(json);
+		// json = MicrosoftAcademicAPI.evaluateMethod(expr, paras);
+		// List<Entity> referenceOfId1 = Entities.getEntityList(json);
 		return null;
 	}
 
 	private List<String> getId2AuIdPath() {
-		
+
 		return null;
 	}
 
@@ -193,7 +193,7 @@ public class Search {
 		for (Entity et : PagersWithSpecAuid) {
 			if (et.getId() == ID && et.getId() != -1) {
 				addResult("[" + AID + "," + ID + "]");
-				System.out.println("[" + AID + "," + ID + "]");
+				// System.out.println("[" + AID + "," + ID + "]");
 			}
 		}
 		stopWatch.stopAndStart("[AA_AuId,Id,]");
@@ -201,7 +201,8 @@ public class Search {
 		for (Entity et : PagersWithSpecAuid) {
 			if (et.getRId() != null && et.getRId().indexOf(ID) != -1) {
 				addResult("[" + AID + "," + et.getId() + "," + ID + "]");
-				System.out.println("[" + AID + "," + et.getId() + "," + ID + "]");
+				// System.out.println("[" + AID + "," + et.getId() + "," + ID +
+				// "]");
 			}
 		}
 		stopWatch.stopAndStart(" [AA_AuId,Id,RId,]");
@@ -209,10 +210,12 @@ public class Search {
 		if (PaperDest.getAfId() != null) {
 			for (int in = 0; in < PaperDest.getAfId().size(); in++) {
 				if (AFID.contains(PaperDest.getAfId().get(in))) {
-					addResult("[" + AID + "," + PaperDest.getAfId().get(in) + "," + PaperDest.getAuId().get(in)
-							+ "," + ID + "]");
-					System.out.println("[" + AID + "," + PaperDest.getAfId().get(in) + "," + PaperDest.getAuId().get(in)
-							+ "," + ID + "]");
+					addResult("[" + AID + "," + PaperDest.getAfId().get(in) + "," + PaperDest.getAuId().get(in) + ","
+							+ ID + "]");
+					// System.out.println("[" + AID + "," +
+					// PaperDest.getAfId().get(in) + "," +
+					// PaperDest.getAuId().get(in)
+					// + "," + ID + "]");
 				}
 			}
 		}
@@ -223,48 +226,55 @@ public class Search {
 				for (Entity et2 : PagersRefSpecId) {
 					if (et.getRId().indexOf(et2.getId()) != -1) {
 						addResult("[" + AID + "," + et.getId() + "," + et2.getId() + "," + ID + "]");
-						System.out.println("[" + AID + "," + et.getId() + "," + et2.getId() + "," + ID + "]");
+						// System.out.println("[" + AID + "," + et.getId() + ","
+						// + et2.getId() + "," + ID + "]");
 					}
 				}
 			}
 		}
 		stopWatch.stopAndStart(" [AA_AuId,Id,RId,RId,]");
 		// [AA_AuId,Id,F_FId,Id,]
-		for (Entity et : PagersWithSpecAuid) {
-			if (et.getFId() != null) {
-				et.getFId().retainAll(PaperDest.getFId());
-				for (long tfid : et.getFId()) {
-					addResult("[" + AID + "," + et.getId() + "," + tfid + "," + ID + "]");
-					System.out.println("[" + AID + "," + et.getId() + "," + tfid + "," + ID + "]");
+		if (PaperDest != null) {
+			for (Entity et : PagersWithSpecAuid) {
+				if (et.getFId() != null&&PaperDest.getFId()!=null) {
+					et.getFId().retainAll(PaperDest.getFId());
+					for (long tfid : et.getFId()) {
+						addResult("[" + AID + "," + et.getId() + "," + tfid + "," + ID + "]");
+						// System.out.println("[" + AID + "," + et.getId() + ","
+						// + tfid + "," + ID + "]");
+					}
 				}
-			}
-			if (et.getAuId() != null) {
-				et.getAuId().retainAll(PaperDest.getAuId());
-				for (long taid : et.getAuId()) {
-					addResult("[" + AID + "," + et.getId() + "," + taid + "," + ID + "]");
-					System.out.println("[" + AID + "," + et.getId() + "," + taid + "," + ID + "]");
+				if (et.getAuId() != null&&PaperDest.getAuId()!=null) {
+					et.getAuId().retainAll(PaperDest.getAuId());
+					for (long taid : et.getAuId()) {
+						addResult("[" + AID + "," + et.getId() + "," + taid + "," + ID + "]");
+						// System.out.println("[" + AID + "," + et.getId() + ","
+						// + taid + "," + ID + "]");
+					}
 				}
-			}
-			if (et.getCCId() != -1) {
-				if (et.getCCId() == PaperDest.getCCId() && PaperDest.getCCId() != -1) {
-					addResult("[" + AID + "," + et.getId() + "," + et.getCCId() + "," + ID + "]");
-					System.out.println("[" + AID + "," + et.getId() + "," + et.getCCId() + "," + ID + "]");
+				if (et.getCCId() != -1&&PaperDest.getCCId()!=-1) {
+					if (et.getCCId() == PaperDest.getCCId() && PaperDest.getCCId() != -1) {
+						addResult("[" + AID + "," + et.getId() + "," + et.getCCId() + "," + ID + "]");
+						// System.out.println("[" + AID + "," + et.getId() + ","
+						// + et.getCCId() + "," + ID + "]");
+					}
 				}
-			}
-			if (et.getJJId() != -1) {
-				if (et.getJJId() == PaperDest.getJJId() && PaperDest.getJJId() != -1) {
-					addResult("[" + AID + "," + et.getId() + "," + et.getJJId() + "," + ID + "]");
-					System.out.println("[" + AID + "," + et.getId() + "," + et.getJJId() + "," + ID + "]");
+				if (et.getJJId() != -1&&PaperDest.getCCId()!=-1) {
+					if (et.getJJId() == PaperDest.getJJId() && PaperDest.getJJId() != -1) {
+						addResult("[" + AID + "," + et.getId() + "," + et.getJJId() + "," + ID + "]");
+						// System.out.println("[" + AID + "," + et.getId() + ","
+						// + et.getJJId() + "," + ID + "]");
+					}
 				}
 			}
 		}
 		stopWatch.stopAndStart("[AA_AuId,Id,(FId,AuId,CCId,JJId),Id,]");
-//		JSONObject rs=new JSONObject();
+		// JSONObject rs=new JSONObject();
 		return endAndGetResult();
 	}
 
 	public void addResult(String item) {
-			result.add(item);
+		result.add(item);
 	}
 
 	public List<String> endAndGetResult() {
@@ -274,6 +284,7 @@ public class Search {
 	public void startResult() {
 		result.clear();
 	}
+
 	List<String> result = new ArrayList<String>();
 
 	private List<String> getAuId2AuIdPath() {
@@ -345,7 +356,7 @@ public class Search {
 			}
 		}
 		stopWatch.stopAndStart("[AA_AuId,Id,RId,AA_AuId,]");
-//		JSONObject rs=new JSONObject();
+		// JSONObject rs=new JSONObject();
 		return endAndGetResult();
 	}
 
