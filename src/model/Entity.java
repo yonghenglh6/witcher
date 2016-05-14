@@ -102,4 +102,18 @@ public class Entity {
 	public List<Long> getRId() {
 		return RId;
 	}
+		private String buildOrExpression(String name, List<Long> l, Boolean isComposite){
+		String res = "";
+		if (isComposite)
+			for (int i =0;i<l.size();i++)
+				res = "Or("+res+",Composite("+name+"="+l.get(i)+"))";
+		else
+			for (int i =0;i<l.size();i++)
+				res = "Or("+res+","+name+"="+l.get(i)+")";
+		return res;
+	}
+
+	public String getRIdOrExpression(){ return buildOrExpression("RId", RId, false); }
+	public String getFIdOrExpression(){ return buildOrExpression("F.FId", FFId, true); }
+	public String getAuIdOrExpression(){ return buildOrExpression("AA.AuId", AuId, true); }
 }
