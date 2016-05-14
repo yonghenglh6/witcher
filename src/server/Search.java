@@ -140,13 +140,14 @@ public class Search {
 	}
 
 	private JSONObject getId2AuIdPath() {
-
+		
 		return null;
 	}
 
 	private JSONObject getAuId2IdPath() {
 		long AID = head;
 		long ID = tail;
+		startResult();
 		StopWatch stopWatch = new StopWatch();
 		JSONObject json;
 		JSONArray paths = new JSONArray();
@@ -177,7 +178,7 @@ public class Search {
 				int tjid = et.getAuId().indexOf(AID);
 				if (tjid != -1) {
 					PagersWithSpecAuid.add(et);
-					if(et.getAfId().get(tjid)!=-1)
+					if (et.getAfId().get(tjid) != -1)
 						AFID.add(et.getAfId().get(tjid));
 				}
 			}
@@ -191,6 +192,7 @@ public class Search {
 		// [AA_AuId,Id,]
 		for (Entity et : PagersWithSpecAuid) {
 			if (et.getId() == ID && et.getId() != -1) {
+				addResult("[" + AID + "," + ID + "]");
 				System.out.println("[" + AID + "," + ID + "]");
 			}
 		}
@@ -198,6 +200,7 @@ public class Search {
 		// [AA_AuId,Id,RId,]
 		for (Entity et : PagersWithSpecAuid) {
 			if (et.getRId() != null && et.getRId().indexOf(ID) != -1) {
+				addResult("[" + AID + "," + et.getId() + "," + ID + "]");
 				System.out.println("[" + AID + "," + et.getId() + "," + ID + "]");
 			}
 		}
@@ -206,7 +209,10 @@ public class Search {
 		if (PaperDest.getAfId() != null) {
 			for (int in = 0; in < PaperDest.getAfId().size(); in++) {
 				if (AFID.contains(PaperDest.getAfId().get(in))) {
-					System.out.println("[" + AID + "," + PaperDest.getAfId().get(in) + "," + PaperDest.getAuId().get(in) + "," + ID + "]");
+					addResult("[" + AID + "," + PaperDest.getAfId().get(in) + "," + PaperDest.getAuId().get(in)
+							+ "," + ID + "]");
+					System.out.println("[" + AID + "," + PaperDest.getAfId().get(in) + "," + PaperDest.getAuId().get(in)
+							+ "," + ID + "]");
 				}
 			}
 		}
@@ -216,6 +222,7 @@ public class Search {
 			if (et.getRId() != null) {
 				for (Entity et2 : PagersRefSpecId) {
 					if (et.getRId().indexOf(et2.getId()) != -1) {
+						addResult("[" + AID + "," + et.getId() + "," + et2.getId() + "," + ID + "]");
 						System.out.println("[" + AID + "," + et.getId() + "," + et2.getId() + "," + ID + "]");
 					}
 				}
@@ -227,111 +234,138 @@ public class Search {
 			if (et.getFId() != null) {
 				et.getFId().retainAll(PaperDest.getFId());
 				for (long tfid : et.getFId()) {
+					addResult("[" + AID + "," + et.getId() + "," + tfid + "," + ID + "]");
 					System.out.println("[" + AID + "," + et.getId() + "," + tfid + "," + ID + "]");
 				}
 			}
 			if (et.getAuId() != null) {
 				et.getAuId().retainAll(PaperDest.getAuId());
 				for (long taid : et.getAuId()) {
+					addResult("[" + AID + "," + et.getId() + "," + taid + "," + ID + "]");
 					System.out.println("[" + AID + "," + et.getId() + "," + taid + "," + ID + "]");
 				}
 			}
 			if (et.getCCId() != -1) {
 				if (et.getCCId() == PaperDest.getCCId() && PaperDest.getCCId() != -1) {
+					addResult("[" + AID + "," + et.getId() + "," + et.getCCId() + "," + ID + "]");
 					System.out.println("[" + AID + "," + et.getId() + "," + et.getCCId() + "," + ID + "]");
 				}
 			}
 			if (et.getJJId() != -1) {
 				if (et.getJJId() == PaperDest.getJJId() && PaperDest.getJJId() != -1) {
+					addResult("[" + AID + "," + et.getId() + "," + et.getJJId() + "," + ID + "]");
 					System.out.println("[" + AID + "," + et.getId() + "," + et.getJJId() + "," + ID + "]");
 				}
 			}
 		}
 		stopWatch.stopAndStart("[AA_AuId,Id,(FId,AuId,CCId,JJId),Id,]");
-		return null;
+		JSONObject rs=new JSONObject(endAndGetResult());
+		return rs;
 	}
+
+	public void addResult(String item) {
+		if (firstR) {
+			firstR = false;
+			result.append("[" + item);
+		} else {
+			result.append("," + item);
+		}
+	}
+
+	public String endAndGetResult() {
+		result.append("]");
+		return result.toString();
+	}
+
+	public void startResult() {
+		firstR=true;
+		result = new StringBuffer();
+	}
+
+	boolean firstR = true;
+	StringBuffer result = new StringBuffer();
 
 	private JSONObject getAuId2AuIdPath() {
 		long AID1 = head;
 		long AID2 = tail;
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
-		JSONArray result=new JSONArray();
-		 
-		
+		startResult();
+
 		Map<String, String> paras = new HashMap<String, String>();
 		paras.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId,RId");
 		paras.put("count", Integer.MAX_VALUE + "");
-		
-		JSONObject json = MicrosoftAcademicAPI.evaluateMethod(Composite(Or("AA.AuId=" + AID1,"AA.AuId=" + AID2)), paras);
+
+		JSONObject json = MicrosoftAcademicAPI.evaluateMethod(Composite(Or("AA.AuId=" + AID1, "AA.AuId=" + AID2)),
+				paras);
 		stopWatch.stopAndStart("查询");
 		List<Entity> entitys = Entities.getEntityList(json);
 		stopWatch.stopAndStart("分析结果");
-		
 
 		ArrayList<Entity> PagersWithAuid1 = new ArrayList<Entity>();
 		ArrayList<Entity> PagersWithAuid2 = new ArrayList<Entity>();
 		HashSet<Long> AFID1 = new HashSet<Long>();
 		HashSet<Long> AFID2 = new HashSet<Long>();
-		
+
 		for (Entity et : entitys) {
 			if (et.getAuId() != null) {
 				int tjid1 = et.getAuId().indexOf(AID1);
 				if (tjid1 != -1) {
 					PagersWithAuid1.add(et);
-					if(et.getAfId().get(tjid1)!=-1)
+					if (et.getAfId().get(tjid1) != -1)
 						AFID1.add(et.getAfId().get(tjid1));
 				}
 				int tjid2 = et.getAuId().indexOf(AID2);
 				if (tjid2 != -1) {
 					PagersWithAuid2.add(et);
-					if(et.getAfId().get(tjid2)!=-1)
+					if (et.getAfId().get(tjid2) != -1)
 						AFID2.add(et.getAfId().get(tjid2));
 				}
 			}
 		}
 		stopWatch.stopAndStart("整理结果");
-		//[AA_AuId,AA_AfId,AA_AuId,]
+		// [AA_AuId,AA_AfId,AA_AuId,]
 		@SuppressWarnings("unchecked")
-		Set<Long> comAFID=(Set<Long>) AFID1.clone();
+		Set<Long> comAFID = (Set<Long>) AFID1.clone();
 		comAFID.retainAll(AFID2);
-		for(long s:comAFID){
+		for (long s : comAFID) {
+			addResult("[" + AID1 + "," + s + "," + AID2 + "]");
 			System.out.println("[" + AID1 + "," + s + "," + AID2 + "]");
 		}
 		stopWatch.stopAndStart("[AA_AuId,AA_AfId,AA_AuId,]");
-		//[AA_AuId,Id,AA_AuId,]
-		List<Entity> comPaper=(List<Entity>) PagersWithAuid1.clone();
+		// [AA_AuId,Id,AA_AuId,]
+		List<Entity> comPaper = (List<Entity>) PagersWithAuid1.clone();
 		comPaper.retainAll(PagersWithAuid2);
-		for(Entity et:comPaper){
+		for (Entity et : comPaper) {
+			addResult("[" + AID1 + "," + et.getId() + "," + AID2 + "]");
 			System.out.println("[" + AID1 + "," + et.getId() + "," + AID2 + "]");
 		}
 		stopWatch.stopAndStart("[AA_AuId,Id,AA_AuId,]");
-		//[AA_AuId,Id,RId,AA_AuId,]
-		ArrayList<Long> idsWithAuid2=getEntityIds(PagersWithAuid2);
-		for(Entity et:PagersWithAuid1){
-			List<Long> tRIDs=et.getRId();
-			if(tRIDs!=null){
+		// [AA_AuId,Id,RId,AA_AuId,]
+		ArrayList<Long> idsWithAuid2 = getEntityIds(PagersWithAuid2);
+		for (Entity et : PagersWithAuid1) {
+			List<Long> tRIDs = et.getRId();
+			if (tRIDs != null) {
 				tRIDs.retainAll(idsWithAuid2);
-				for(long trid:tRIDs){
-					System.out.println("[" + AID1 + "," + et.getId() + ","+trid +","+ AID2 + "]");
+				for (long trid : tRIDs) {
+					addResult("[" + AID1 + "," + et.getId() + "," + trid + "," + AID2 + "]");
+					System.out.println("[" + AID1 + "," + et.getId() + "," + trid + "," + AID2 + "]");
 				}
 			}
 		}
 		stopWatch.stopAndStart("[AA_AuId,Id,RId,AA_AuId,]");
-		
-		return null;
+		JSONObject rs=new JSONObject(endAndGetResult());
+		return rs;
 	}
-	
-	
-	public ArrayList<Long> getEntityIds(List<Entity> ets){
-		ArrayList<Long> tRID=new ArrayList<Long>();
-		for(Entity et:ets){
+
+	public ArrayList<Long> getEntityIds(List<Entity> ets) {
+		ArrayList<Long> tRID = new ArrayList<Long>();
+		for (Entity et : ets) {
 			tRID.add(et.getId());
 		}
 		return tRID;
 	}
-	
-	
+
 	public String Or(String a, String b) {
 		return "Or(" + a + "," + b + ")";
 	}
