@@ -8,17 +8,17 @@ import org.json.JSONObject;
 
 public class MicrosoftAcademicAPI {
 
-	public JSONObject evaluateMethod(String expr, Map<String, String> params) {
+	public static JSONObject evaluateMethod(String expr, Map<String, String> params) {
 		params.put("expr", expr);
 		return baseMethod(MicrosoftAcademicClient.URL_EVALUATE, params);
 	}
 
-	public JSONObject calcHistogramMethod(String expr, Map<String, String> params) {
+	public static JSONObject calcHistogramMethod(String expr, Map<String, String> params) {
 		params.put("expr", expr);
 		return baseMethod(MicrosoftAcademicClient.URL_CALCHISTOGRAM, params);
 	}
 
-	private JSONObject baseMethod(String baseURL, Map<String, String> params) {
+	private static JSONObject baseMethod(String baseURL, Map<String, String> params) {
 		String strResult = MicrosoftAcademicClient.getInstance().get(baseURL, params);
 		JSONObject JSONResult = new JSONObject(strResult);
 		return JSONResult;

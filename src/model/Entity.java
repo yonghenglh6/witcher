@@ -1,37 +1,82 @@
 package model;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import model.Attribute.TYPE;
 
 public class Entity {
-	private JSONObject json;
-	private int Id;
-	private List<Integer> FFId;
-	private List<Integer> JJId;
-	private List<Integer> CCId;
-	private List<Integer> AuId;
-	private List<Integer> AfId;
-	private List<Integer> RId;
-	
-	public Entity(JSONObject j) {
-		json = j;
+	private long Id = -1;
+	private List<Long> FFId = null;
+	private long JJId = -1;
+	private long CCId = -1;
+	private List<Long> AuId = null;
+	private List<Long> AfId = null;
+	private List<Long> RId = null;
+
+	public Entity(JSONObject json) {
+		JSONArray jsonArray = json.getJSONArray("entities");
+		String key = null;
+		for (int i = 0; i < jsonArray.length(); i++) {
+			JSONObject jsonEntity = jsonArray.getJSONObject(i);
+			Iterator iJsonEntity = jsonEntity.keys();
+			while (iJsonEntity.hasNext()) {
+				key = (String) iJsonEntity.next();
+				switch (key) {
+				case "Id":
+					Id = jsonEntity.getInt(key);
+					break;
+				case "F":
+					JSONArray FFIdJsonArray = jsonEntity.getJSONArray(key);
+					FFId = new ArrayList<Long>();
+					for (int j = 0; j < FFIdJsonArray.length(); j++) {
+						JSONObject FieldJson = FFIdJsonArray.getJSONObject(j);
+						FFId.add(FieldJson.getLong("FId"));
+					}
+					break;
+				case "J":
+					JSONObject JJIdJson = jsonEntity.getJSONObject(key);
+					JJId = JJIdJson.getLong("JId");
+					break;
+				case "C":
+					JSONObject CCIdJson = jsonEntity.getJSONObject(key);
+					CCId = CCIdJson.getLong("CId");
+					break;
+				case "AA":
+					
+					break;
+				case "RId":
+					JSONArray RIdJsonArray = jsonEntity.getJSONArray(key);
+					RId = new ArrayList<Long>();
+					for (int j = 0; j < RIdJsonArray.length(); j++) {
+						RId.add(RIdJsonArray.getLong(j));
+					}
+					break;
+				}
+			}
+		}
 	}
-	
-	public int getId() {
-		return Id;
-	}
-	
-	public List<Integer> getEntity(TYPE type) {
-		switch(type) {
-		case F_FId:
-			return FFId;
+
+	public long getSingleEntity(TYPE type) {
+		switch (type) {
 		case J_JId:
 			return JJId;
 		case C_CId:
 			return CCId;
+		case Id:
+			return Id;
+		}
+		return -1;
+	}
+
+	public List<Long> getListEntity(TYPE type) {
+		switch (type) {
+		case F_FId:
+			return FFId;
 		case AA_AuId:
 			return AuId;
 		case AA_AfId:
