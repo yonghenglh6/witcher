@@ -43,8 +43,11 @@ public class Dealer extends HttpServlet {
 			List<String> list2 = SearchWrapper.search(TYPE.AA_AuId, id1, TYPE.Id, id2);
 			List<String> list3 = SearchWrapper.search(TYPE.Id, id1, TYPE.AA_AuId, id2);
 			List<String> list4 = SearchWrapper.search(TYPE.AA_AuId, id1, TYPE.AA_AuId, id2);
+			if(list2!=null)
 			list1.addAll(list2);
+			if(list3!=null)
 			list1.addAll(list3);
+			if(list4!=null)
 			list1.addAll(list4);
 			String rs = "[";
 			boolean first = true;
