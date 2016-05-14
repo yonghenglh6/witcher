@@ -27,13 +27,13 @@ public class Dealer extends HttpServlet {
 			for (String value : values) {
 				out += value + ",";
 			}
-			out += "].\n";
-			FileWriter fw = new FileWriter("d:/input.txt", true);
-			fw.append(out);
-			fw.flush();
-			fw.close();
-		}
+			out += "]";
 
+		}
+		FileWriter fw = new FileWriter("d:/input.txt", true);
+		fw.append(out+"\n======");
+		fw.flush();
+		fw.close();
 		try {
 			String id1str = pmaps.get("id1")[0];
 			String id2str = pmaps.get("id2")[0];
