@@ -74,30 +74,32 @@ public class Entity {
 			}
 		}
 	}
-
-	public long getSingleEntity(TYPE type) {
-		switch (type) {
-		case J_JId:
-			return JJId;
-		case C_CId:
-			return CCId;
-		case Id:
-			return Id;
-		}
-		return -1;
+	
+	public long getId() {
+		return Id;
 	}
-
-	public List<Long> getListEntity(TYPE type) {
-		switch (type) {
-		case F_FId:
-			return FFId;
-		case AA_AuId:
-			return AuId;
-		case AA_AfId:
-			return AfId;
-		case RId:
-			return RId;
-		}
-		return null;
+	
+	public long getJJId() {
+		return JJId;
+	}
+	
+	public long getCCId() {
+		return CCId;
+	}
+	
+	public List<Long> getFId() {
+		return FFId;
+	}
+	
+	public List<Long> getAuId() {
+		return AuId;
+	}
+	
+	public List<Long> getAfId() {
+		return AfId;
+	}
+	
+	public List<Long> getRId() {
+		return RId;
 	}
 }
