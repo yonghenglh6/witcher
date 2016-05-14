@@ -252,10 +252,86 @@ public class Search {
 	}
 
 	private JSONObject getAuId2AuIdPath() {
+		long AID1 = head;
+		long AID2 = tail;
+		StopWatch stopWatch = new StopWatch();
+		stopWatch.start();
+		JSONArray result=new JSONArray();
+		 
+		
+		Map<String, String> paras = new HashMap<String, String>();
+		paras.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId,RId");
+		paras.put("count", Integer.MAX_VALUE + "");
+		
+		JSONObject json = MicrosoftAcademicAPI.evaluateMethod(Composite(Or("AA.AuId=" + AID1,"AA.AuId=" + AID2)), paras);
+		stopWatch.stopAndStart("查询");
+		List<Entity> entitys = Entities.getEntityList(json);
+		stopWatch.stopAndStart("分析结果");
+		
 
+		ArrayList<Entity> PagersWithAuid1 = new ArrayList<Entity>();
+		ArrayList<Entity> PagersWithAuid2 = new ArrayList<Entity>();
+		HashSet<Long> AFID1 = new HashSet<Long>();
+		HashSet<Long> AFID2 = new HashSet<Long>();
+		
+		for (Entity et : entitys) {
+			if (et.getAuId() != null) {
+				int tjid1 = et.getAuId().indexOf(AID1);
+				if (tjid1 != -1) {
+					PagersWithAuid1.add(et);
+					if(et.getAfId().get(tjid1)!=-1)
+						AFID1.add(et.getAfId().get(tjid1));
+				}
+				int tjid2 = et.getAuId().indexOf(AID2);
+				if (tjid2 != -1) {
+					PagersWithAuid2.add(et);
+					if(et.getAfId().get(tjid2)!=-1)
+						AFID2.add(et.getAfId().get(tjid2));
+				}
+			}
+		}
+		stopWatch.stopAndStart("整理结果");
+		//[AA_AuId,AA_AfId,AA_AuId,]
+		@SuppressWarnings("unchecked")
+		Set<Long> comAFID=(Set<Long>) AFID1.clone();
+		comAFID.retainAll(AFID2);
+		for(long s:comAFID){
+			System.out.println("[" + AID1 + "," + s + "," + AID2 + "]");
+		}
+		stopWatch.stopAndStart("[AA_AuId,AA_AfId,AA_AuId,]");
+		//[AA_AuId,Id,AA_AuId,]
+		List<Entity> comPaper=(List<Entity>) PagersWithAuid1.clone();
+		comPaper.retainAll(PagersWithAuid2);
+		for(Entity et:comPaper){
+			System.out.println("[" + AID1 + "," + et.getId() + "," + AID2 + "]");
+		}
+		stopWatch.stopAndStart("[AA_AuId,Id,AA_AuId,]");
+		//[AA_AuId,Id,RId,AA_AuId,]
+		ArrayList<Long> idsWithAuid2=getEntityIds(PagersWithAuid2);
+		for(Entity et:PagersWithAuid1){
+			List<Long> tRIDs=et.getRId();
+			if(tRIDs!=null){
+				tRIDs.retainAll(idsWithAuid2);
+				for(long trid:tRIDs){
+					System.out.println("[" + AID1 + "," + et.getId() + ","+trid +","+ AID2 + "]");
+				}
+			}
+		}
+		stopWatch.stopAndStart("[AA_AuId,Id,RId,AA_AuId,]");
+		
 		return null;
 	}
-
+	
+	
+	public ArrayList<Long> getEntityIds(List<Entity> ets){
+		ArrayList<Long> tRID=new ArrayList<Long>();
+		for(Entity et:ets){
+			tRID.add(et.getId());
+		}
+		return tRID;
+	}
+	
+	
 	public String Or(String a, String b) {
 		return "Or(" + a + "," + b + ")";
 	}
@@ -269,7 +345,6 @@ public class Search {
 	}
 
 	public static void main(String args[]) {
-		Search search = new Search(TYPE.Id, 2157025439L, TYPE.Id, 2233354937L);
-		search.getPath();
+
 	}
 }

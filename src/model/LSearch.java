@@ -26,6 +26,6 @@ public class LSearch {
 
 	public static void main(String atgs[]){
 		LSearch s=new LSearch();
-		s.search(new Attribute(TYPE.AA_AuId,2157025439L), new Attribute(TYPE.Id,2117829666L));
+		s.search(new Attribute(TYPE.AA_AuId,2157025439L), new Attribute(TYPE.AA_AuId,2117829666L));
 	}
 }
