@@ -27,6 +27,7 @@ public class Rules {
 		}
 		if (t == TYPE.AA_AuId) {
 			result.add(TYPE.AA_AfId);
+			result.add(TYPE.Id);
 		}
 		if (t == TYPE.AA_AfId) {
 			result.add(TYPE.AA_AuId);

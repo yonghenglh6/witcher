@@ -8,7 +8,6 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.SSLContext;
@@ -26,6 +25,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+@SuppressWarnings("deprecation")
 public class MicrosoftAcademicClient {
 	static MicrosoftAcademicClient self;
 
@@ -40,6 +40,7 @@ public class MicrosoftAcademicClient {
 		try {
 			SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
 				// 信任所有
+				@SuppressWarnings("unused")
 				public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
 					return true;
 				}
@@ -133,7 +134,7 @@ public class MicrosoftAcademicClient {
 	public static final String URL_CALCHISTOGRAM = "https://api.projectoxford.ai/academic/v1.0/calchistogram";
 	public static final String URL_INTERPRET = "https://api.projectoxford.ai/academic/v1.0/interpret";
 	private static final String KEY1 = "aa006460ea674d9287b2302218969fc8";
-	private static final String KEY2 = "b23b122400e04defa8d330567cb04f7b";
+	//private static final String KEY2 = "b23b122400e04defa8d330567cb04f7b";
 
 	public String get(String baseUrl, Map<String, String> params) {
 		String url = baseUrl + "?";

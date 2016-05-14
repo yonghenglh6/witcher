@@ -1,33 +1,36 @@
 package server;
 
-import org.json.JSONArray;
-import org.json.JSONException;
+import java.util.Map;
+
+//import org.json.JSONArray;
+//import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MicrosoftAcademicAPI {
 
-	// if some parameters are unnecessary, input "" or -1.
-	public JSONObject evaluateMethod(String expr, String model, String attributes, int count, int offset, String orderby) {
-		String evaluateURL = "https://api.projectoxford.ai/academic/v1.0/evaluate?expr=" + expr;
-		if(!model.equals(""))
-			evaluateURL = evaluateURL + "&model=" + model;
-		if(!attributes.equals(""))
-			evaluateURL = evaluateURL + "&attributes=" + attributes;
-		if(count != -1)
-			evaluateURL = evaluateURL + "&count=" + count;
-		if(offset != -1)
-			evaluateURL = evaluateURL + "&offset=" + offset;
-		if(!orderby.equals(""))
-			evaluateURL = evaluateURL + "&orderby=" + orderby;
-		
-		String result = MicrosoftAcademicClient.getInstance().get(evaluateURL);
-		JSONObject JSONResult = new JSONObject(result);
-		return null;
+	public JSONObject evaluateMethod(String expr, Map<String, String> params) {
+		params.put("expr", expr);
+		return baseMethod(MicrosoftAcademicClient.URL_EVALUATE, params);
 	}
 
-	// if some parameters are unnecessary, input "" or -1.
-	public JSONObject calcHistogramMethod(String expr, String model, String attributes, int count, int offset) {
-		String calcHistogramURL = "https://api.projectoxford.ai/academic/v1.0/evaluate?";
-		return null;
+	public JSONObject calcHistogramMethod(String expr, Map<String, String> params) {
+		params.put("expr", expr);
+		return baseMethod(MicrosoftAcademicClient.URL_CALCHISTOGRAM, params);
 	}
+
+	private JSONObject baseMethod(String baseURL, Map<String, String> params) {
+		String strResult = MicrosoftAcademicClient.getInstance().get(baseURL, params);
+		JSONObject JSONResult = new JSONObject(strResult);
+		return JSONResult;
+	}
+
+//	public static void main(String args[]) {
+//		Map<String, String> pm = new HashMap<String, String>();
+//		pm.put("expr", "Composite(AA.AuN=='jaime teevan')");
+//		pm.put("attributes", "Ti,Y,CC,AA.AuN,AA.AuId");
+//		Map<String, String> result = baseMethod(MicrosoftAcademicClient.URL_EVALUATE, pm);
+//		for (String key : result.keySet()) {
+//			System.out.println(key + ": " + result.get(key));
+//		}
+//	}
 }
