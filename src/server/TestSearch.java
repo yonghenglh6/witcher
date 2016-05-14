@@ -27,6 +27,18 @@ public class TestSearch {
 		
 	}
 	public static void AuId2Id3hop(){
+//		long AID=2052648321L;
+//		long ID=2037965136L;
+//		long RID=2166559705L;
+//		long RID2=2100406636L;
+//		SearchWrapper.search(TYPE.AA_AuId, AID, TYPE.Id, RID2);
+		
+		long AID=2052648321L;
+		long AID2=2041650587L;
+		long ID=1511277043L;
+		long AFID=97018004L;
+		SearchWrapper.search(TYPE.AA_AuId, AID, TYPE.Id, ID);
+		
 		
 	}
 	public static void AuId2Id(){
@@ -38,6 +50,6 @@ public class TestSearch {
 	public static void main(String[] args){
 		//twoHopId_ID();
 		//oneHopId_ID();
-		AuId2Id();
+		AuId2Id3hop();
 	}
 }
