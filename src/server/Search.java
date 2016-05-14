@@ -38,7 +38,7 @@ public class Search {
 		tail = t;
 	}
 
-	public JSONObject getPath() {
+	public List<String> getPath() {
 		switch (category) {
 		case Id2Id:
 			return getId2IdPath();
@@ -52,7 +52,7 @@ public class Search {
 		return null;
 	}
 
-	private JSONObject getId2IdPath() {
+	private List<String> getId2IdPath() {
 		StopWatch stopWatch = new StopWatch();
 		JSONObject json;
 		JSONArray paths = new JSONArray();
@@ -139,12 +139,12 @@ public class Search {
 		return null;
 	}
 
-	private JSONObject getId2AuIdPath() {
+	private List<String> getId2AuIdPath() {
 		
 		return null;
 	}
 
-	private JSONObject getAuId2IdPath() {
+	private List<String> getAuId2IdPath() {
 		long AID = head;
 		long ID = tail;
 		startResult();
@@ -259,33 +259,24 @@ public class Search {
 			}
 		}
 		stopWatch.stopAndStart("[AA_AuId,Id,(FId,AuId,CCId,JJId),Id,]");
-		JSONObject rs=new JSONObject(endAndGetResult());
-		return rs;
+//		JSONObject rs=new JSONObject();
+		return endAndGetResult();
 	}
 
 	public void addResult(String item) {
-		if (firstR) {
-			firstR = false;
-			result.append("[" + item);
-		} else {
-			result.append("," + item);
-		}
+			result.add(item);
 	}
 
-	public String endAndGetResult() {
-		result.append("]");
-		return result.toString();
+	public List<String> endAndGetResult() {
+		return result;
 	}
 
 	public void startResult() {
-		firstR=true;
-		result = new StringBuffer();
+		result.clear();
 	}
+	List<String> result = new ArrayList<String>();
 
-	boolean firstR = true;
-	StringBuffer result = new StringBuffer();
-
-	private JSONObject getAuId2AuIdPath() {
+	private List<String> getAuId2AuIdPath() {
 		long AID1 = head;
 		long AID2 = tail;
 		StopWatch stopWatch = new StopWatch();
@@ -354,8 +345,8 @@ public class Search {
 			}
 		}
 		stopWatch.stopAndStart("[AA_AuId,Id,RId,AA_AuId,]");
-		JSONObject rs=new JSONObject(endAndGetResult());
-		return rs;
+//		JSONObject rs=new JSONObject();
+		return endAndGetResult();
 	}
 
 	public ArrayList<Long> getEntityIds(List<Entity> ets) {
