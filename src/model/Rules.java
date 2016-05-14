@@ -70,12 +70,25 @@ public class Rules {
 		}
 		return getPaths(rs,dest,hop-1);
 	}
+	
+	public List<List<TYPE>> getPath(TYPE oType,TYPE eType,int hop){
+		List<List<TYPE>> begin=new ArrayList<List<TYPE>>();
+		List<TYPE> ori=new ArrayList<TYPE>();
+		ori.add(oType);
+		begin.add(ori);
+		return getPaths(begin, eType, hop);
+	}
+	
 	public static void main(String[] args){
+		StopWatch stopWatch = new StopWatch();
+		stopWatch.start();
 		Rules rules=new Rules();
 		List<List<TYPE>> begin=new ArrayList<List<TYPE>>();
 		List<TYPE> ori=new ArrayList<TYPE>();
 		ori.add(TYPE.Id);
 		begin.add(ori);
 		List<List<TYPE>> kk=rules.getPaths(begin, TYPE.Id, 3);
+		stopWatch.stop("generatePath");
+		
 	}
 }
