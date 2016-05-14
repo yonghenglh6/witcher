@@ -140,7 +140,116 @@ public class Search {
 	}
 
 	private JSONObject getId2AuIdPath() {
+		JSONObject jsonRes;
+		Map<String, String> paras = new HashMap<String, String>();
 
+		String reqStr, resStr;
+		List<String> resStrList = new ArrayList<>();
+		List<String> reqStrList = new ArrayList<>();
+
+		// REQ1
+		paras.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,RId");
+		jsonRes = MicrosoftAcademicAPI.evaluateMethod("Id=" + head, paras);
+
+		Entity headE = Entities.getEntityList(jsonRes).get(0);
+
+		// REQ2
+		paras.clear();paras.put("attributes", "F.FId,Id,RId");
+		reqStr = "Or("+headE.getRIdOrExpression()+",RId="+tail+")";
+		reqStr = "Or(Composite(F.FId="+headE.getFIdOrExpression()+"),"+reqStr+")";
+		reqStr = "Or(RId="+tail+","+reqStr+")";
+		reqStr = "Or("+headE.getAuIdOrExpression()+"),"+reqStr+")";
+		jsonRes = MicrosoftAcademicAPI.evaluateMethod(reqStr, paras);
+		Stream<Entity> reqRes2 = Entities.getEntityList(jsonRes).stream();
+
+		// CAL1
+		Stream<Long> Right = reqRes2.filter(e -> e.getRId().contains(tail)).map(e -> e.getId());
+		Stream<Entity> IdLeft = reqRes2.filter(e -> headE.getRId().contains(e.getId()));
+		// TODO check
+		Stream<Entity> FFLeft = reqRes2.filter(e -> headE.getFId().retainAll(e.getFId()));
+		FFLeft.forEach(e -> e.getFId().retainAll(headE.getFId()));
+		Stream<Entity> AuLeft = reqRes2.filter(e -> headE.getAuId().retainAll(e.getAuId()));
+		AuLeft.forEach(e -> e.getAuId().retainAll(headE.getAuId()));
+
+		// 1HOP
+		if (headE.getRId().contains(tail))
+			resStrList.add("["+head+","+tail+"]");
+		// 2HOP
+		Right.filter(l -> headE.getRId().contains(l)).forEach(
+				l -> resStrList.add("["+head+","+l+","+tail+"]")
+		);
+		// 3HOP : Id->Id->Id->AuId
+		IdLeft.forEach(
+				el -> Right.filter(er -> el.getRId().contains(er)).forEach(
+						er -> resStrList.add("[" + head + "," + el.getId() + "," + er + "]")
+				)
+		);
+		// 3HOP : Id->FFId->Id->AuId
+		FFLeft.forEach(
+				el -> Right.filter(er -> el.getFId().contains(er)).forEach(
+						er -> el.getFId().forEach(
+								lv -> resStrList.add("[" + head + "," + lv + "," + er + "," + tail + "]")
+						)
+				)
+		);
+		// 3HOP : Id->AuId->Id->AuId
+		AuLeft.forEach(
+				el -> Right.filter(er -> el.getAuId().contains(er)).forEach(
+						er -> el.getAuId().forEach(
+								lv -> resStrList.add("[" + head + "," + lv + "," + er + "," + tail + "]")
+						)
+				)
+		);
+
+		// REQ3
+		paras.clear();paras.put("attributes", "Id,RId");
+		if (headE.getCCId() != -1)
+			reqStrList.add("And(Composite(C.CId="+headE.getCCId()+"),Composite(AA.AuId="+tail+"))");
+		else if (headE.getJJId() != -1)
+			reqStrList.add("And(Composite(J.JId="+headE.getJJId()+"),Composite(AA.AuId="+tail+"))");
+		AuLeft.forEach(
+				e -> e.getAfId().forEach(
+						af -> reqStrList.add("Composite(And(AA.AfId="+af+",AA.AuId="+tail+"))")
+				)
+		);
+		reqStr = "";
+		for (int i=0;i<reqStrList.size();i++)
+			reqStr = "Or("+reqStr+","+reqStrList.get(i)+")";
+		paras.clear();paras.put("attributes", "F.FId,Id,RId");
+		jsonRes = MicrosoftAcademicAPI.evaluateMethod(reqStr, paras);
+		Stream<Entity> reqRes3 = Entities.getEntityList(jsonRes).stream();
+
+		Stream<Entity> AfLeft = reqRes3.filter(e -> e.getCCId() != headE.getJJId() && e.getJJId() != headE.getJJId());
+		List<Long> AfList = new ArrayList<>();AuLeft.forEach(e -> AfList.addAll(e.getAfId()));
+        AfLeft.forEach(
+                eAf -> {
+                    eAf.getAuId().retainAll(headE.getAuId());
+                    eAf.getAfId().retainAll(AfList);
+                }
+        );
+
+		// HOP3 : Id->CCId/JJId->Id->AuId
+		if (headE.getCCId() != -1)
+			reqRes3.filter(e -> e.getCCId() == headE.getCCId()).forEach(
+					e -> resStrList.add("["+head+","+headE.getCCId()+","+e.getId()+","+tail+"]")
+			);
+		else if (headE.getJJId() != -1)
+			reqRes3.filter(e -> e.getCCId() == headE.getJJId()).forEach(
+					e -> resStrList.add("[" + head + "," + headE.getJJId() + "," + e.getId() + "," + tail + "]")
+			);
+
+		// HOP3 : Id->AuId->AfId->AuId
+		AuLeft.forEach(
+				e -> e.getAuId().forEach(
+						lAu -> e.getAfId().forEach(
+								lAf -> resStrList.add("["+head+","+lAu+","+lAf+","+tail+"]")
+						)
+				)
+		);
+
+		resStr = "[" + String.join(",", resStrList) + "]";
+
+		// TODO: TO JSON
 		return null;
 	}
 
@@ -157,12 +266,12 @@ public class Search {
 		json = MicrosoftAcademicAPI.evaluateMethod(Or(Or(Composite("AA.AuId=" + AID), "Id=" + ID), "RId=" + ID), paras);
 		// json = MicrosoftAcademicAPI.evaluateMethod(Or(Composite("AA.AuId=" +
 		// AID), "Id=" + ID), paras);
-		stopWatch.stop("查询");
+		stopWatch.stop("鏌ヨ");
 		stopWatch.start();
 		// System.out.println(json.toString());
 		List<Entity> entitys = Entities.getEntityList(json);
 
-		stopWatch.stop("分析结果");
+		stopWatch.stop("鍒嗘瀽缁撴灉");
 		stopWatch.start();
 		Entity PaperDest = null;
 		List<Entity> PagersWithSpecAuid = new ArrayList<Entity>();
@@ -186,7 +295,7 @@ public class Search {
 			}
 		}
 
-		stopWatch.stop("分类返回数据");
+		stopWatch.stop("鍒嗙被杩斿洖鏁版嵁");
 		stopWatch.start();
 		// [AA_AuId,Id,]
 		for (Entity et : PagersWithSpecAuid) {
