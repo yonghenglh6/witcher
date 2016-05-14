@@ -259,7 +259,7 @@ public class Search {
 						// + et.getCCId() + "," + ID + "]");
 					}
 				}
-				if (et.getJJId() != -1&&PaperDest.getCCId()!=-1) {
+				if (et.getJJId() != -1&&PaperDest.getJJId()!=-1) {
 					if (et.getJJId() == PaperDest.getJJId() && PaperDest.getJJId() != -1) {
 						addResult("[" + AID + "," + et.getId() + "," + et.getJJId() + "," + ID + "]");
 						// System.out.println("[" + AID + "," + et.getId() + ","
