@@ -1,11 +1,13 @@
 package server;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONObject;
 
 import model.Attribute.TYPE;
+import model.Entity;
 
 public class Search {
 	public static enum Category {
@@ -45,10 +47,10 @@ public class Search {
 	
 	private JSONObject getId2IdPath() {
 		JSONObject jsonRes;
-		MicrosoftAcademicAPI msAPI = new MicrosoftAcademicAPI();
 		Map<String, String> paras = new HashMap<String, String>();
 		paras.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId,RId");
-		jsonRes = msAPI.evaluateMethod("Or(Id=" + head + ",Id=" + tail + ")", paras);
+		jsonRes = MicrosoftAcademicAPI.evaluateMethod("Or(Or(Id=" + head + ",Id=" + tail + "),RId=" + tail +")", paras);
+		
 		return null;
 	}
 	

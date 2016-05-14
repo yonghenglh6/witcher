@@ -19,62 +19,58 @@ public class Entity {
 	private List<Long> RId = null;
 
 	public Entity(JSONObject json) {
-		JSONArray jsonArray = json.getJSONArray("entities");
 		String key = null;
-		for (int i = 0; i < jsonArray.length(); i++) {
-			JSONObject jsonEntity = jsonArray.getJSONObject(i);
-			Iterator iJsonEntity = jsonEntity.keys();
-			while (iJsonEntity.hasNext()) {
-				key = (String) iJsonEntity.next();
-				switch (key) {
-				case "Id":
-					Id = jsonEntity.getLong(key);
-					break;
-				case "F":
-					JSONArray FFIdJsonArray = jsonEntity.getJSONArray(key);
-					FFId = new ArrayList<Long>();
-					for (int j = 0; j < FFIdJsonArray.length(); j++) {
-						JSONObject FieldJson = FFIdJsonArray.getJSONObject(j);
-						FFId.add(FieldJson.getLong("FId"));
-					}
-					break;
-				case "J":
-					JSONObject JJIdJson = jsonEntity.getJSONObject(key);
-					JJId = JJIdJson.getLong("JId");
-					break;
-				case "C":
-					JSONObject CCIdJson = jsonEntity.getJSONObject(key);
-					CCId = CCIdJson.getLong("CId");
-					break;
-				case "AA":
-					JSONArray AAJsonArray = jsonEntity.getJSONArray(key);
-					AuId = new ArrayList<Long>();
-					AfId = new ArrayList<Long>();
-					for (int j = 0; j < AAJsonArray.length(); j++) {
-						JSONObject jsonAA = AAJsonArray.getJSONObject(j);
-						Iterator iJsonAA = jsonAA.keys();
-						while(iJsonAA.hasNext()) {
-							switch((String) iJsonAA.next()) {
-							case "AuId":
-								AuId.add(jsonAA.getLong("AuId"));
-								break;
-							case "AfId":
-								AfId.add(jsonAA.getLong("AfId"));
-								break;
-							}
-						}
-						if(AuId.size() != AfId.size())
-							AfId.add((long) -1);
-					}
-					break;
-				case "RId":
-					JSONArray RIdJsonArray = jsonEntity.getJSONArray(key);
-					RId = new ArrayList<Long>();
-					for (int j = 0; j < RIdJsonArray.length(); j++) {
-						RId.add(RIdJsonArray.getLong(j));
-					}
-					break;
+		Iterator iJsonEntity = json.keys();
+		while (iJsonEntity.hasNext()) {
+			key = (String) iJsonEntity.next();
+			switch (key) {
+			case "Id":
+				Id = json.getLong(key);
+				break;
+			case "F":
+				JSONArray FFIdJsonArray = json.getJSONArray(key);
+				FFId = new ArrayList<Long>();
+				for (int j = 0; j < FFIdJsonArray.length(); j++) {
+					JSONObject FieldJson = FFIdJsonArray.getJSONObject(j);
+					FFId.add(FieldJson.getLong("FId"));
 				}
+				break;
+			case "J":
+				JSONObject JJIdJson = json.getJSONObject(key);
+				JJId = JJIdJson.getLong("JId");
+				break;
+			case "C":
+				JSONObject CCIdJson = json.getJSONObject(key);
+				CCId = CCIdJson.getLong("CId");
+				break;
+			case "AA":
+				JSONArray AAJsonArray = json.getJSONArray(key);
+				AuId = new ArrayList<Long>();
+				AfId = new ArrayList<Long>();
+				for (int j = 0; j < AAJsonArray.length(); j++) {
+					JSONObject jsonAA = AAJsonArray.getJSONObject(j);
+					Iterator iJsonAA = jsonAA.keys();
+					while (iJsonAA.hasNext()) {
+						switch ((String) iJsonAA.next()) {
+						case "AuId":
+							AuId.add(jsonAA.getLong("AuId"));
+							break;
+						case "AfId":
+							AfId.add(jsonAA.getLong("AfId"));
+							break;
+						}
+					}
+					if (AuId.size() != AfId.size())
+						AfId.add((long) -1);
+				}
+				break;
+			case "RId":
+				JSONArray RIdJsonArray = json.getJSONArray(key);
+				RId = new ArrayList<Long>();
+				for (int j = 0; j < RIdJsonArray.length(); j++) {
+					RId.add(RIdJsonArray.getLong(j));
+				}
+				break;
 			}
 		}
 	}
