@@ -28,7 +28,7 @@ public class Entity {
 				key = (String) iJsonEntity.next();
 				switch (key) {
 				case "Id":
-					Id = jsonEntity.getInt(key);
+					Id = jsonEntity.getLong(key);
 					break;
 				case "F":
 					JSONArray FFIdJsonArray = jsonEntity.getJSONArray(key);
@@ -47,7 +47,25 @@ public class Entity {
 					CCId = CCIdJson.getLong("CId");
 					break;
 				case "AA":
-					
+					JSONArray AAJsonArray = jsonEntity.getJSONArray(key);
+					AuId = new ArrayList<Long>();
+					AfId = new ArrayList<Long>();
+					for (int j = 0; j < AAJsonArray.length(); j++) {
+						JSONObject jsonAA = AAJsonArray.getJSONObject(j);
+						Iterator iJsonAA = jsonAA.keys();
+						while(iJsonAA.hasNext()) {
+							switch((String) iJsonAA.next()) {
+							case "AuId":
+								AuId.add(jsonAA.getLong("AuId"));
+								break;
+							case "AfId":
+								AfId.add(jsonAA.getLong("AfId"));
+								break;
+							}
+						}
+						if(AuId.size() != AfId.size())
+							AfId.add((long) -1);
+					}
 					break;
 				case "RId":
 					JSONArray RIdJsonArray = jsonEntity.getJSONArray(key);
