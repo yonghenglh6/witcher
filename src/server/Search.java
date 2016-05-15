@@ -72,17 +72,8 @@ public class Search {
 			mrs.addAll(list4);
 			System.out.println("auid2auid:" + list4.size());
 		}
-		List<String> mmrs = new ArrayList<String>();
-		for(String item:mrs){
-			if(item.indexOf(","+head+",")!=-1||item.indexOf(","+tail+",")!=-1){
-				
-			}else{
-				mmrs.add(item);
-			}
-		}
 
-		System.out.println(mmrs.size());
-		return mmrs;
+		return mrs;
 	}
 
 	TYPE ID1TYPE = null;
@@ -299,7 +290,9 @@ public class Search {
 			}
 			if (et.getAuId() != null && et.getAuId().contains(AID)) {
 				PagersWithSpecAuid.add(et);
-				AFID.add(et.getAfId().get(et.getAuId().indexOf(AID)));
+				long afid = et.getAfId().get(et.getAuId().indexOf(AID));
+				if (afid != -1)
+					AFID.add(afid);
 			}
 		}
 
@@ -393,7 +386,7 @@ public class Search {
 		if (AFIDMap.size() == 0) {
 			if (etId.getAuId() != null) {
 				for (int i = 0; i < etId.getAuId().size(); i++) {
-					if (AFID.contains(etId.getAfId().get(i))) {
+					if (etId.getAfId().get(i) != -1 && AFID.contains(etId.getAfId().get(i))) {
 						addResult(
 								"[" + ID + "," + etId.getAuId().get(i) + "," + etId.getAfId().get(i) + "," + AID + "]");
 					}
@@ -485,15 +478,15 @@ public class Search {
 		stopWatch.start();
 
 		// [AA_AuId,Id,]
-		if(PaperDest.getAuId().contains(AID)){
+		if (PaperDest.getAuId().contains(AID)) {
 			addResult("[" + AID + "," + ID + "]");
 		}
-//		for (Entity et : PagersWithSpecAuid) {
-//			if (et.getId() == ID && et.getId() != -1) {
-//				
-//				// System.out.println("[" + AID + "," + ID + "]");
-//			}
-//		}
+		// for (Entity et : PagersWithSpecAuid) {
+		// if (et.getId() == ID && et.getId() != -1) {
+		//
+		// // System.out.println("[" + AID + "," + ID + "]");
+		// }
+		// }
 		stopWatch.stopAndStart("[AA_AuId,Id,]");
 		// [AA_AuId,Id,RId,]
 		for (Entity et : PagersWithSpecAuid) {
