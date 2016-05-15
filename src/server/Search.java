@@ -311,9 +311,12 @@ public class Search {
 		}
 		stopWatch.stopAndStart("[Id,AA_AuId,]");
 		// [Id,RId,AA_AuId,]
-		for (Entity et : PagersWithSpecAuid) {
-			if (et.getAuId().contains(AID)) {
-				addResult("[" + ID + "," + et.getId() + "," + AID + "]");
+		if (etId.getRId() != null) {
+			List<Long> headids = getEntityIds(PagersWithSpecAuid);
+			for (Entity et : PagersWithSpecAuid) {
+				for(long trid:getCommItemAndOverrideFirst(headids, etId.getRId())){
+					addResult("[" + ID + "," + trid + "," + AID + "]");
+				}
 			}
 		}
 		stopWatch.stopAndStart("[Id,RId,AA_AuId,]");
@@ -587,7 +590,7 @@ public class Search {
 		comAFID.retainAll(AFID2);
 		for (long s : comAFID) {
 			addResult("[" + AID1 + "," + s + "," + AID2 + "]");
-			//System.out.println("[" + AID1 + "," + s + "," + AID2 + "]");
+			// System.out.println("[" + AID1 + "," + s + "," + AID2 + "]");
 		}
 		stopWatch.stopAndStart("[AA_AuId,AA_AfId,AA_AuId,]");
 		// [AA_AuId,Id,AA_AuId,]
@@ -595,7 +598,8 @@ public class Search {
 		comPaper.retainAll(PagersWithAuid2);
 		for (Entity et : comPaper) {
 			addResult("[" + AID1 + "," + et.getId() + "," + AID2 + "]");
-			//System.out.println("[" + AID1 + "," + et.getId() + "," + AID2 + "]");
+			// System.out.println("[" + AID1 + "," + et.getId() + "," + AID2 +
+			// "]");
 		}
 		stopWatch.stopAndStart("[AA_AuId,Id,AA_AuId,]");
 		// [AA_AuId,Id,RId,AA_AuId,]
@@ -606,7 +610,8 @@ public class Search {
 				tRIDs.retainAll(idsWithAuid2);
 				for (long trid : tRIDs) {
 					addResult("[" + AID1 + "," + et.getId() + "," + trid + "," + AID2 + "]");
-					//System.out.println("[" + AID1 + "," + et.getId() + "," + trid + "," + AID2 + "]");
+					// System.out.println("[" + AID1 + "," + et.getId() + "," +
+					// trid + "," + AID2 + "]");
 				}
 			}
 		}
