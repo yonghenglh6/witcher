@@ -1,5 +1,7 @@
 package server;
 
+import java.util.List;
+
 import model.Attribute.TYPE;
 
 public class TestSearch {
@@ -56,12 +58,14 @@ public class TestSearch {
 	public static void test1(){
 //		long AID1=2052648321L;
 //		long AID2=2041650587L;
-		SearchWrapper.search( 2122841972,1968481722 );
+		long[] testCase=new long[]{2034912444,1511277043,20184837};
+		List<String> rs=SearchWrapper.search( testCase[0],  testCase[testCase.length-1]);
+		
 	}
 	public static void id2id(){
 		long ID1=1511277043;
 		long ID2=1576962511;
-		SearchWrapper.search( ID1,  ID2);
+		
 	}
 	
 	public static void main(String[] args){

@@ -330,7 +330,7 @@ public class Search {
 		Map<Long, Set<Long>> AFIDMap = new HashMap<Long, Set<Long>>();
 		if (!evalateStatement.equals("")) {
 			Map<String, String> paras2 = new HashMap<String, String>();
-			paras2.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId");
+			paras2.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId,RId");
 			paras2.put("count", Integer.MAX_VALUE + "");
 			JSONObject json2 = MicrosoftAcademicAPI.evaluateMethod(evalateStatement, paras2);
 			ArrayList<Entity> entities2 = (ArrayList<Entity>) Entities.getEntityList(json2);
@@ -475,12 +475,15 @@ public class Search {
 		stopWatch.start();
 
 		// [AA_AuId,Id,]
-		for (Entity et : PagersWithSpecAuid) {
-			if (et.getId() == ID && et.getId() != -1) {
-				addResult("[" + AID + "," + ID + "]");
-				// System.out.println("[" + AID + "," + ID + "]");
-			}
+		if(PaperDest.getAuId().contains(AID)){
+			addResult("[" + AID + "," + ID + "]");
 		}
+//		for (Entity et : PagersWithSpecAuid) {
+//			if (et.getId() == ID && et.getId() != -1) {
+//				
+//				// System.out.println("[" + AID + "," + ID + "]");
+//			}
+//		}
 		stopWatch.stopAndStart("[AA_AuId,Id,]");
 		// [AA_AuId,Id,RId,]
 		for (Entity et : PagersWithSpecAuid) {
