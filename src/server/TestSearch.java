@@ -6,21 +6,21 @@ public class TestSearch {
 	public static void oneHopId_ID(){
 		long Id1=2157025439L;
 		long Id2=2122841972L;
-		Search search=new Search(TYPE.Id,Id1,TYPE.Id,Id2);
+		Search search=new Search(Id1,Id2);
 		search.getPath();
 	}
 	public static void twoHopId_ID(){
 		long Id1=2157025439L;
 		long Id2=2117829666L;
 		long IdMid=2122841972L;
-		Search search=new Search(TYPE.Id,Id1,TYPE.Id,Id2);
+		Search search=new Search(Id1,Id2);
 		search.getPath();
 	}
 	
 	public static void AuId2Id1hop(){
 		long AID=2052648321L;
 		long ID=2066636486L;
-		Search search=new Search(TYPE.AA_AuId,AID,TYPE.Id,ID);
+		Search search=new Search(AID,ID);
 		search.getPath();
 	}
 	public static void AuId2Id2hop(){
@@ -37,7 +37,7 @@ public class TestSearch {
 		long AID2=2041650587L;
 		long ID=1511277043L;
 		long AFID=97018004L;
-		SearchWrapper.search(TYPE.AA_AuId, AID, TYPE.Id, ID);
+		SearchWrapper.search( AID,  ID);
 	}
 	public static void AuId2Id(){
 		AuId2Id1hop();
@@ -49,7 +49,7 @@ public class TestSearch {
 	public static void AuId2Auid(){
 		long AID1=2052648321L;
 		long AID2=2041650587L;
-		SearchWrapper.search(TYPE.AA_AuId, AID1, TYPE.AA_AuId, AID2);
+		SearchWrapper.search( AID1,  AID2);
 	}
 	public static void main(String[] args){
 		//twoHopId_ID();

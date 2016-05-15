@@ -39,8 +39,8 @@ public class Dealer extends HttpServlet {
 		try {
 //			String id1str = "57898110", id2str = "2014261844";//auid2auid 27
 //			String id1str = "2332023333", id2str = "57898110";//id2auid   6
-			String id1str = "2332023333", id2str = "2310280492";//id2id   1
-//			String id1str = "2147152072", id2str = "189831743";//id2id    9
+//			String id1str = "2332023333", id2str = "2310280492";//id2id   1
+			String id1str = "2147152072", id2str = "189831743";//id2id    9
 //			String id1str = "2251253715", id2str = "2180737804";//auid2id 14
 			if (pmaps.get("id1") != null)
 				id1str = pmaps.get("id1")[0];
@@ -48,28 +48,7 @@ public class Dealer extends HttpServlet {
 				id2str = pmaps.get("id2")[0];
 			long id1 = Long.valueOf(id1str);
 			long id2 = Long.valueOf(id2str);
-			List<String> list1 = SearchWrapper.search(TYPE.Id, id1, TYPE.Id, id2);
-			List<String> list2 = SearchWrapper.search(TYPE.AA_AuId, id1, TYPE.Id, id2);
-			List<String> list3 = SearchWrapper.search(TYPE.Id, id1, TYPE.AA_AuId, id2);
-			List<String> list4 = SearchWrapper.search(TYPE.AA_AuId, id1, TYPE.AA_AuId, id2);
-
-			List<String> mrs = new ArrayList<String>();
-			if (list1 != null){
-				mrs.addAll(list1);
-				System.out.println("id2id:"+list1.size());
-			}
-			if (list2 != null){
-				mrs.addAll(list2);
-				System.out.println("auid2id:"+list2.size());
-			}
-			if (list3 != null){
-				mrs.addAll(list3);
-				System.out.println("id2auid:"+list3.size());
-			}
-			if (list4 != null){
-				mrs.addAll(list4);
-				System.out.println("auid2auid:"+list4.size());
-			}
+			List<String> mrs = SearchWrapper.search(id1,  id2);
 
 			String rs = "[";
 			boolean first = true;

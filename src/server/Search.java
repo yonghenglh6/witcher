@@ -17,45 +17,74 @@ import model.Entity;
 import model.StopWatch;
 
 public class Search {
-	public static enum Category {
-		Id2Id, Id2AuId, AuId2Id, AuId2AuId
-	}
+	// public static enum Category {
+	// Id2Id, Id2AuId, AuId2Id, AuId2AuId
+	// }
 
 	private long head;
 	private long tail;
-	private Category category;
+	// private Category category;
 
-	public Search(TYPE ht, long h, TYPE tt, long t) {
-		if (ht == TYPE.Id && tt == TYPE.Id) {
-			category = Category.Id2Id;
-		} else if (ht == TYPE.Id && tt == TYPE.AA_AuId) {
-			category = Category.Id2AuId;
-		} else if (ht == TYPE.AA_AuId && tt == TYPE.Id) {
-			category = Category.AuId2Id;
-		} else if (ht == TYPE.AA_AuId && tt == TYPE.AA_AuId) {
-			category = Category.AuId2AuId;
-		}
+	public Search(long h, long t) {
+		// if (ht == TYPE.Id && tt == TYPE.Id) {
+		// category = Category.Id2Id;
+		// } else if (ht == TYPE.Id && tt == TYPE.AA_AuId) {
+		// category = Category.Id2AuId;
+		// } else if (ht == TYPE.AA_AuId && tt == TYPE.Id) {
+		// category = Category.AuId2Id;
+		// } else if (ht == TYPE.AA_AuId && tt == TYPE.AA_AuId) {
+		// category = Category.AuId2AuId;
+		// }
 		head = h;
 		tail = t;
 	}
 
 	public List<String> getPath() {
-		switch (category) {
-		case Id2Id:
-			return getId2IdPath();
-		case Id2AuId:
-			return getId2AuIdPath();
-		case AuId2Id:
-			return getAuId2IdPath();
-		case AuId2AuId:
-			return getAuId2AuIdPath();
+		// switch (category) {
+		// case Id2Id:
+		// return getId2IdPath();
+		// case Id2AuId:
+		// return getId2AuIdPath();
+		// case AuId2Id:
+		// return getAuId2IdPath();
+		// case AuId2AuId:
+		// return getAuId2AuIdPath();
+		// }
+		List<String> list4 = getAuId2AuIdPath();
+		List<String> list1 = getId2IdPath();
+		List<String> list2 = getId2AuIdPath();
+		List<String> list3 = getAuId2IdPath();
+
+		List<String> mrs = new ArrayList<String>();
+		if (list1 != null) {
+			mrs.addAll(list1);
+			System.out.println("id2id:" + list1.size());
 		}
-		return null;
+		if (list2 != null) {
+			mrs.addAll(list2);
+			System.out.println("auid2id:" + list2.size());
+		}
+		if (list3 != null) {
+			mrs.addAll(list3);
+			System.out.println("id2auid:" + list3.size());
+		}
+		if (list4 != null) {
+			mrs.addAll(list4);
+			System.out.println("auid2auid:" + list4.size());
+		}
+		return mrs;
 	}
+
+	TYPE ID1TYPE = null;
+	TYPE ID2TYPE = null;
 
 	private List<String> getId2IdPath() {
 		long ID1 = head;
 		long ID2 = tail;
+
+		if (!((ID1TYPE == TYPE.Id && ID2TYPE == TYPE.Id) || (ID1TYPE == null && ID2TYPE == null))) {
+			return null;
+		}
 
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
@@ -85,8 +114,10 @@ public class Search {
 		}
 		stopWatch.stopAndStart("1次整理结果");
 		// 所求不是指定的类型
-		if (etId1 == null || etId2 == null)
+		if (etId1 == null || etId2 == null) {
+
 			return new ArrayList<String>();
+		}
 
 		// 2次查询
 		List<Long> et1rids = etId1.getRId();
@@ -224,6 +255,9 @@ public class Search {
 	}
 
 	private List<String> getId2AuIdPath() {
+		if (!((ID1TYPE == TYPE.Id && ID2TYPE == TYPE.AA_AuId) || (ID1TYPE == null && ID2TYPE == null))) {
+			return null;
+		}
 		long AID = tail;
 		long ID = head;
 		startResult();
@@ -386,6 +420,9 @@ public class Search {
 	}
 
 	private List<String> getAuId2IdPath() {
+		if (!((ID1TYPE == TYPE.AA_AuId && ID2TYPE == TYPE.Id) || (ID1TYPE == null && ID2TYPE == null))) {
+			return null;
+		}
 		long AID = head;
 		long ID = tail;
 		startResult();
@@ -554,6 +591,10 @@ public class Search {
 	List<String> result = new ArrayList<String>();
 
 	private List<String> getAuId2AuIdPath() {
+		if (!((ID1TYPE == TYPE.AA_AuId && ID2TYPE == TYPE.AA_AuId) || (ID1TYPE == null && ID2TYPE == null))) {
+			return null;
+		}
+
 		long AID1 = head;
 		long AID2 = tail;
 		StopWatch stopWatch = new StopWatch();
@@ -594,8 +635,21 @@ public class Search {
 		stopWatch.stopAndStart("整理结果");
 
 		// 所求不是指定的类型
-		if (PagersWithAuid1.size() == 0 || PagersWithAuid2.size() == 0)
+
+		if (PagersWithAuid1.size() == 0 || PagersWithAuid2.size() == 0) {
+			if (PagersWithAuid1.size() == 0)
+				ID1TYPE = TYPE.Id;
+			else
+				ID1TYPE = TYPE.AA_AuId;
+			if (PagersWithAuid2.size() == 0)
+				ID2TYPE = TYPE.Id;
+			else
+				ID2TYPE = TYPE.AA_AuId;
 			return new ArrayList<String>();
+		} else {
+			ID1TYPE = TYPE.AA_AuId;
+			ID2TYPE = TYPE.AA_AuId;
+		}
 
 		// [AA_AuId,AA_AfId,AA_AuId,]
 		@SuppressWarnings("unchecked")

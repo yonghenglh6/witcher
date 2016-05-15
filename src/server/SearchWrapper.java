@@ -7,8 +7,8 @@ import org.json.JSONObject;
 import model.Attribute.TYPE;
 
 public class SearchWrapper {
-	public static List<String> search(TYPE ht, long h, TYPE tt, long t){
-		Search search=new Search(ht,h,tt,t);
+	public static List<String> search(long h,  long t){
+		Search search=new Search(h,t);
 		return search.getPath();
 	}
 }
