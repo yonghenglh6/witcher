@@ -74,13 +74,14 @@ public class Search {
 		}
 		List<String> mmrs = new ArrayList<String>();
 		for(String item:mrs){
-			if(item.contains(","+head+",")||item.contains(","+tail+",")){
+			if(item.indexOf(","+head+",")!=-1||item.indexOf(","+tail+",")!=-1){
 				
 			}else{
 				mmrs.add(item);
 			}
 		}
-		
+
+		System.out.println(mmrs.size());
 		return mmrs;
 	}
 
