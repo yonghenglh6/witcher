@@ -1,5 +1,6 @@
 package server;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,6 +54,170 @@ public class Search {
 	}
 
 	private List<String> getId2IdPath() {
+		long ID1 = head;
+		long ID2 = tail;
+
+		StopWatch stopWatch = new StopWatch();
+		stopWatch.start();
+		startResult();
+
+		// 1次查询
+		Map<String, String> paras1 = new HashMap<String, String>();
+		paras1.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId,RId");
+		paras1.put("count", Integer.MAX_VALUE + "");
+		JSONObject json1 = MicrosoftAcademicAPI.evaluateMethod(Or(Or("Id=" + ID1, "Id=" + ID2), "RId=" + ID2), paras1);
+
+		stopWatch.stopAndStart("query");
+
+		List<Entity> entitys = Entities.getEntityList(json1);
+		ArrayList<Entity> etRefID2 = new ArrayList<Entity>();
+		ArrayList<Entity> etRefByID1 = new ArrayList<Entity>();
+		Entity etId1 = null, etId2 = null;
+		for (Entity et : entitys) {
+			if (et.getId() == ID1) {
+				etId1 = et;
+			}
+			if (et.getId() == ID2) {
+				etId2 = et;
+			}
+			if (et.getRId() != null && et.getRId().indexOf(ID2) != -1) {
+				etRefID2.add(et);
+			}
+		}
+
+		if (etId1 == null || etId2 == null)
+			return new ArrayList<String>();
+
+		// 2次查询
+		List<Long> et1rids = etId1.getRId();
+		if (et1rids != null && et1rids.size() > 0) {
+			String evalateStatement = "Id=" + et1rids.get(0);
+			for (int i = 1; i < etId1.getRId().size(); i++) {
+				evalateStatement = Or(evalateStatement, "Id=" + et1rids.get(i));
+			}
+
+			Map<String, String> paras2 = new HashMap<String, String>();
+			paras2.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId");
+			paras2.put("count", Integer.MAX_VALUE + "");
+			JSONObject json2 = MicrosoftAcademicAPI.evaluateMethod(evalateStatement, paras2);
+			etRefByID1 = (ArrayList<Entity>) Entities.getEntityList(json2);
+		}
+
+		// [Id,RId,]
+		if (etId1.getRId() != null && etId1.getRId().indexOf(etId2) != -1) {
+			addResult("[" + ID1 + "," + ID2 + "]");
+		}
+		// [Id,RId,RId,]
+		if (etId1.getRId() != null) {
+			ArrayList<Long> comm = getEntityIds(etRefID2);
+			comm.retainAll(etId1.getRId());
+			for (long trid : comm) {
+				addResult("[" + ID1 + "," + trid + "," + ID2 + "]");
+			}
+		}
+
+		// [Id,F_FId,Id,]
+		if (etId1.getFId() != null && etId2.getFId() != null) {
+			for (long tcomid : getCommItemWithNoChange(etId1.getFId(), etId2.getFId())) {
+				addResult("[" + ID1 + "," + tcomid + "," + ID2 + "]");
+			}
+		}
+
+		// [Id,C_CId,Id,]
+		if (etId1.getCCId() != -1 && etId2.getCCId() != -1) {
+			if (etId1.getCCId() == etId2.getCCId()) {
+				addResult("[" + ID1 + "," + etId1.getCCId() + "," + ID2 + "]");
+			}
+		}
+
+		// [Id,J_JId,Id,]
+
+		if (etId1.getJJId() != -1 && etId2.getJJId() != -1) {
+			if (etId1.getJJId() == etId2.getJJId()) {
+				addResult("[" + ID1 + "," + etId1.getJJId() + "," + ID2 + "]");
+			}
+		}
+		// [Id,AA_AuId,Id,]
+		if (etId1.getAuId() != null && etId2.getAuId() != null) {
+			for (long tcomid : getCommItemWithNoChange(etId1.getAuId(), etId2.getAuId())) {
+				addResult("[" + ID1 + "," + tcomid + "," + ID2 + "]");
+			}
+		}
+
+		// [Id,RId,RId,RId,]
+		ArrayList<Long> tidrefByid2 = getEntityIds(etRefID2);
+		for (Entity et : etRefByID1) {
+			List<Long> trids = et.getRId();
+			if (trids != null) {
+				trids.retainAll(tidrefByid2);
+				for (long tcomrid : trids) {
+					addResult("[" + ID1 + "," + et.getId() + "," + tcomrid + "," + ID2 + "]");
+				}
+			}
+		}
+		// [Id,RId,F_FId,Id,]
+		for (Entity et : etRefByID1) {
+			for (long tcomid : getCommItemAndOverrideFirst(et.getFId(), etId2.getFId())) {
+				addResult("[" + ID1 + "," + et.getId() + "," + tcomid + "," + ID2 + "]");
+			}
+		}
+
+		// [Id,RId,C_CId,Id,]
+		for (Entity et : etRefByID1) {
+			if (et.getCCId() != -1 && et.getCCId() == etId2.getCCId()) {
+				addResult("[" + ID1 + "," + et.getId() + "," + et.getCCId() + "," + ID2 + "]");
+			}
+		}
+
+		// [Id,RId,J_JId,Id,]
+		for (Entity et : etRefByID1) {
+			if (et.getJJId() != -1 && et.getJJId() == etId2.getJJId()) {
+				addResult("[" + ID1 + "," + et.getId() + "," + et.getJJId() + "," + ID2 + "]");
+			}
+		}
+
+		// [Id,RId,AA_AuId,Id,]
+		for (Entity et : etRefByID1) {
+			for (long tcomaid : getCommItemAndOverrideFirst(et.getAuId(), etId2.getAuId())) {
+				addResult("[" + ID1 + "," + et.getId() + "," + tcomaid + "," + ID2 + "]");
+			}
+		}
+
+		// [Id,F_FId,Id,RId,]
+		// [Id,C_CId,Id,RId,]
+		// [Id,J_JId,Id,RId,]
+		// [Id,AA_AuId,Id,RId,]
+		for (Entity et : etRefID2) {
+			List<Long> jihe1_1 = et.getAuId();
+			List<Long> jihe2_1 = et.getFId();
+			long zhi1_1 = et.getCCId();
+			long zhi2_1 = et.getJJId();
+
+			List<Long> jihe1_2 = etId1.getAuId();
+			List<Long> jihe2_2 = etId1.getFId();
+			long zhi1_2 = etId1.getCCId();
+			long zhi2_2 = etId1.getJJId();
+
+			for (long tcom : getCommItemAndOverrideFirst(jihe1_1, jihe1_2)) {
+				addResult("[" + ID1 + "," + tcom + "," + et.getId() + "," + ID2 + "]");
+			}
+			for (long tcom : getCommItemAndOverrideFirst(jihe2_1, jihe2_2)) {
+				addResult("[" + ID1 + "," + tcom + "," + et.getId() + "," + ID2 + "]");
+			}
+			if (zhi1_1 != -1 && zhi1_2 != -1 && zhi1_1 == zhi1_2) {
+				addResult("[" + ID1 + "," + zhi1_1 + "," + et.getId() + "," + ID2 + "]");
+			}
+			if (zhi2_1 != -1 && zhi2_2 != -1 && zhi2_1 == zhi2_2) {
+				addResult("[" + ID1 + "," + zhi2_1 + "," + et.getId() + "," + ID2 + "]");
+			}
+		}
+		return endAndGetResult();
+	}
+
+	private List<String> getId2AuIdPath() {
+		long AID = tail;
+		long ID = head;
+		startResult();
 		StopWatch stopWatch = new StopWatch();
 		JSONObject json;
 		JSONArray paths = new JSONArray();
@@ -60,86 +225,13 @@ public class Search {
 		paras.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId,RId");
 		paras.put("count", Integer.MAX_VALUE + "");
 		stopWatch.start();
-		json = MicrosoftAcademicAPI.evaluateMethod(Or(Or("Id=" + head, "Id=" + tail), "RId=" + tail), paras);
-		stopWatch.stop("query");
+		json = MicrosoftAcademicAPI.evaluateMethod(Or(Or(Composite("AA.AuId=" + AID), "Id=" + ID), "RId=" + ID), paras);
+		// json = MicrosoftAcademicAPI.evaluateMethod(Or(Composite("AA.AuId=" +
+		// AID), "Id=" + ID), paras);
+		stopWatch.stop("查询");
 		stopWatch.start();
-
-		List<Entity> Id2AsReference = Entities.getEntityList(json);
-		Entity Id1 = null, Id2 = null;
-		for (int i = 0, count = 0; i < Id2AsReference.size() && count < 2; i++) {
-			if (Id2AsReference.get(i).getId() == head) {
-				Id1 = Id2AsReference.get(i);
-				Id2AsReference.remove(i);
-				--i;
-				++count;
-			} else if (Id2AsReference.get(i).getId() == tail) {
-				Id2 = Id2AsReference.get(i);
-				Id2AsReference.remove(i);
-				--i;
-				++count;
-			}
-		}
-
-		List<Long> RId1 = Id1.getRId();
-		// 1-hop
-		if (-1 != RId1.indexOf(Id2.getId())) {
-			System.out.println("[" + head + "," + tail + "]");
-		}
-		// 2-hop Id->Id->Id
-		for (int i = 0; i < Id2AsReference.size(); i++) {
-			Entity e = Id2AsReference.get(i);
-			if (-1 != RId1.indexOf(e.getId())) {
-				System.out.println("[" + head + "," + e.getId() + "," + tail + "]");
-			}
-		}
-
-		// 2-hop Id->CId->Id
-		if (Id1.getCCId() == Id2.getCCId() && -1 != Id1.getCCId()) {
-			System.out.println("[" + head + "," + Id1.getCCId() + "," + tail + "]");
-		}
-
-		// 2-hop Id->JId->Id
-		if (Id1.getJJId() == Id2.getJJId() && -1 != Id1.getJJId()) {
-			System.out.println("[" + head + "," + Id1.getJJId() + "," + tail + "]");
-		}
-
-		// 2-hop Id->AuId->Id
-		List<Long> AuId1 = Id1.getAuId();
-		List<Long> AuId2 = Id2.getAuId();
-		if (AuId1 != null && AuId2 != null) {
-			for (int i = 0; i < AuId1.size(); i++) {
-				if (-1 != AuId2.indexOf(AuId1.get(i))) {
-					System.out.println("[" + head + "," + AuId1.get(i) + "," + tail + "]");
-				}
-			}
-		}
-
-		// 2-hop Id->FId->Id
-		List<Long> FId1 = Id1.getFId();
-		List<Long> FId2 = Id2.getFId();
-		if (FId1 != null && FId2 != null) {
-			for (int i = 0; i < FId1.size(); i++) {
-				if (-1 != FId2.indexOf(FId1.get(i))) {
-					System.out.println("[" + head + "," + FId1.get(i) + "," + tail + "]");
-				}
-			}
-		}
-		stopWatch.stop("1&2-hop");
-
-		// 3-hop
-		String expr = "";
-		if (RId1.size() > 0)
-			expr = "Id=" + RId1.get(0);
-		for (int i = 1; i < RId1.size(); i++) {
-			expr = Or(expr, "Id=" + RId1.get(i));
-		}
-		System.out.println(expr);
-		// json = MicrosoftAcademicAPI.evaluateMethod(expr, paras);
-		// List<Entity> referenceOfId1 = Entities.getEntityList(json);
-		return null;
-	}
-
-	private List<String> getId2AuIdPath() {
+		// System.out.println(json.toString());
+		List<Entity> entitys = Entities.getEntityList(json);
 
 		return null;
 	}
@@ -236,7 +328,7 @@ public class Search {
 		// [AA_AuId,Id,F_FId,Id,]
 		if (PaperDest != null) {
 			for (Entity et : PagersWithSpecAuid) {
-				if (et.getFId() != null&&PaperDest.getFId()!=null) {
+				if (et.getFId() != null && PaperDest.getFId() != null) {
 					et.getFId().retainAll(PaperDest.getFId());
 					for (long tfid : et.getFId()) {
 						addResult("[" + AID + "," + et.getId() + "," + tfid + "," + ID + "]");
@@ -244,7 +336,7 @@ public class Search {
 						// + tfid + "," + ID + "]");
 					}
 				}
-				if (et.getAuId() != null&&PaperDest.getAuId()!=null) {
+				if (et.getAuId() != null && PaperDest.getAuId() != null) {
 					et.getAuId().retainAll(PaperDest.getAuId());
 					for (long taid : et.getAuId()) {
 						addResult("[" + AID + "," + et.getId() + "," + taid + "," + ID + "]");
@@ -252,14 +344,14 @@ public class Search {
 						// + taid + "," + ID + "]");
 					}
 				}
-				if (et.getCCId() != -1&&PaperDest.getCCId()!=-1) {
+				if (et.getCCId() != -1 && PaperDest.getCCId() != -1) {
 					if (et.getCCId() == PaperDest.getCCId() && PaperDest.getCCId() != -1) {
 						addResult("[" + AID + "," + et.getId() + "," + et.getCCId() + "," + ID + "]");
 						// System.out.println("[" + AID + "," + et.getId() + ","
 						// + et.getCCId() + "," + ID + "]");
 					}
 				}
-				if (et.getJJId() != -1&&PaperDest.getJJId()!=-1) {
+				if (et.getJJId() != -1 && PaperDest.getJJId() != -1) {
 					if (et.getJJId() == PaperDest.getJJId() && PaperDest.getJJId() != -1) {
 						addResult("[" + AID + "," + et.getId() + "," + et.getJJId() + "," + ID + "]");
 						// System.out.println("[" + AID + "," + et.getId() + ","
@@ -283,6 +375,24 @@ public class Search {
 
 	public void startResult() {
 		result.clear();
+	}
+
+	private List<Long> getCommItemAndOverrideFirst(List<Long> first, List<Long> second) {
+		if (first == null || second == null) {
+			return new ArrayList<Long>();
+		}
+		first.retainAll(second);
+		return first;
+	}
+
+	private List<Long> getCommItemWithNoChange(List<Long> first, List<Long> second) {
+		if (first == null || second == null) {
+			return new ArrayList<Long>();
+		}
+		@SuppressWarnings("unchecked")
+		List<Long> comm = (List<Long>) ((ArrayList<Long>) first).clone();
+		comm.retainAll(second);
+		return comm;
 	}
 
 	List<String> result = new ArrayList<String>();
