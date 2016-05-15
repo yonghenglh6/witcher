@@ -37,7 +37,11 @@ public class Dealer extends HttpServlet {
 		fw.close();
 
 		try {
-			String id1str = "57898110", id2str = "2014261844";
+//			String id1str = "57898110", id2str = "2014261844";//auid2auid 27
+//			String id1str = "2332023333", id2str = "57898110";//id2auid   6
+			String id1str = "2332023333", id2str = "2310280492";//id2id   1
+//			String id1str = "2147152072", id2str = "189831743";//id2id    9
+//			String id1str = "2251253715", id2str = "2180737804";//auid2id 14
 			if (pmaps.get("id1") != null)
 				id1str = pmaps.get("id1")[0];
 			if (pmaps.get("id2") != null)

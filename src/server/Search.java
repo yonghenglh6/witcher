@@ -81,9 +81,7 @@ public class Search {
 			if (et.getId() == ID2) {
 				etId2 = et;
 			}
-			if (et.getRId() != null && et.getRId().indexOf(ID2) != -1) {
-				etRefID2.add(et);
-			}
+
 		}
 		stopWatch.stopAndStart("1次整理结果");
 		// 所求不是指定的类型
@@ -92,19 +90,34 @@ public class Search {
 
 		// 2次查询
 		List<Long> et1rids = etId1.getRId();
+		String evalateStatement = "";
 		if (et1rids != null && et1rids.size() > 0) {
-			String evalateStatement = "Id=" + et1rids.get(0);
+			evalateStatement = "Id=" + et1rids.get(0);
 			for (int i = 1; i < etId1.getRId().size(); i++) {
 				evalateStatement = Or(evalateStatement, "Id=" + et1rids.get(i));
 			}
-
+		}
+		if (!evalateStatement.equals("")) {
+			evalateStatement = Or(evalateStatement, "RId=" + ID2);
+		} else {
+			evalateStatement = "RId=" + ID2;
+		}
+		if (!evalateStatement.equals("")) {
 			Map<String, String> paras2 = new HashMap<String, String>();
 			paras2.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId");
 			paras2.put("count", Integer.MAX_VALUE + "");
 			JSONObject json2 = MicrosoftAcademicAPI.evaluateMethod(evalateStatement, paras2);
-			etRefByID1 = (ArrayList<Entity>) Entities.getEntityList(json2);
+			ArrayList<Entity> entities2 = (ArrayList<Entity>) Entities.getEntityList(json2);
+			for (Entity et : entities2) {
+				if (et1rids.contains(et.getId())) {
+					etRefByID1.add(et);
+				}
+				if (et.getRId() != null && et.getRId().contains(ID2)) {
+					etRefID2.add(et);
+				}
+			}
+			stopWatch.stopAndStart("2次查询并整理结果");
 		}
-		stopWatch.stopAndStart("2次查询并整理结果");
 		// [Id,RId,]
 		if (etId1.getRId() != null && etId1.getRId().indexOf(etId2) != -1) {
 			addResult("[" + ID1 + "," + ID2 + "]");
@@ -314,7 +327,7 @@ public class Search {
 		if (etId.getRId() != null) {
 			List<Long> headids = getEntityIds(PagersWithSpecAuid);
 			for (Entity et : PagersWithSpecAuid) {
-				for(long trid:getCommItemAndOverrideFirst(headids, etId.getRId())){
+				for (long trid : getCommItemAndOverrideFirst(headids, etId.getRId())) {
 					addResult("[" + ID + "," + trid + "," + AID + "]");
 				}
 			}
