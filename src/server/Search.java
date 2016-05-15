@@ -188,27 +188,17 @@ public class Search {
 		// [Id,J_JId,Id,RId,]
 		// [Id,AA_AuId,Id,RId,]
 		for (Entity et : etRefID2) {
-			List<Long> jihe1_1 = et.getAuId();
-			List<Long> jihe2_1 = et.getFId();
-			long zhi1_1 = et.getCCId();
-			long zhi2_1 = et.getJJId();
-
-			List<Long> jihe1_2 = etId1.getAuId();
-			List<Long> jihe2_2 = etId1.getFId();
-			long zhi1_2 = etId1.getCCId();
-			long zhi2_2 = etId1.getJJId();
-
-			for (long tcom : getCommItemAndOverrideFirst(jihe1_1, jihe1_2)) {
+			for (long tcom : getCommItemAndOverrideFirst(et.getAuId(), etId1.getAuId())) {
 				addResult("[" + ID1 + "," + tcom + "," + et.getId() + "," + ID2 + "]");
 			}
-			for (long tcom : getCommItemAndOverrideFirst(jihe2_1, jihe2_2)) {
+			for (long tcom : getCommItemAndOverrideFirst(et.getFId(), etId1.getFId())) {
 				addResult("[" + ID1 + "," + tcom + "," + et.getId() + "," + ID2 + "]");
 			}
-			if (zhi1_1 != -1 && zhi1_2 != -1 && zhi1_1 == zhi1_2) {
-				addResult("[" + ID1 + "," + zhi1_1 + "," + et.getId() + "," + ID2 + "]");
+			if (et.getCCId() != -1 && et.getCCId() == etId1.getCCId()) {
+				addResult("[" + ID1 + "," + et.getCCId() + "," + et.getId() + "," + ID2 + "]");
 			}
-			if (zhi2_1 != -1 && zhi2_2 != -1 && zhi2_1 == zhi2_2) {
-				addResult("[" + ID1 + "," + zhi2_1 + "," + et.getId() + "," + ID2 + "]");
+			if (et.getJJId() != -1 && et.getJJId() == etId1.getJJId()) {
+				addResult("[" + ID1 + "," + et.getJJId() + "," + et.getId() + "," + ID2 + "]");
 			}
 		}
 		return endAndGetResult();
@@ -218,22 +208,153 @@ public class Search {
 		long AID = tail;
 		long ID = head;
 		startResult();
+
 		StopWatch stopWatch = new StopWatch();
-		JSONObject json;
-		JSONArray paths = new JSONArray();
+		stopWatch.start();
+
+		// 第一次查询
 		Map<String, String> paras = new HashMap<String, String>();
 		paras.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId,RId");
 		paras.put("count", Integer.MAX_VALUE + "");
-		stopWatch.start();
-		json = MicrosoftAcademicAPI.evaluateMethod(Or(Or(Composite("AA.AuId=" + AID), "Id=" + ID), "RId=" + ID), paras);
+		JSONObject json = MicrosoftAcademicAPI.evaluateMethod(Or(Composite("AA.AuId=" + AID), "Id=" + ID), paras);
 		// json = MicrosoftAcademicAPI.evaluateMethod(Or(Composite("AA.AuId=" +
 		// AID), "Id=" + ID), paras);
-		stopWatch.stop("查询");
-		stopWatch.start();
-		// System.out.println(json.toString());
+		stopWatch.stopAndStart("查询");
 		List<Entity> entitys = Entities.getEntityList(json);
 
-		return null;
+		stopWatch.stop("分析结果");
+		stopWatch.start();
+		Entity etId = null;
+		List<Entity> PagersWithSpecAuid = new ArrayList<Entity>();
+
+		Set<Long> AFID = new HashSet<Long>();
+		for (Entity et : entitys) {
+			if (et.getId() == ID) {
+				etId = et;
+			}
+			if (et.getAuId() != null && et.getAuId().contains(AID)) {
+				PagersWithSpecAuid.add(et);
+				AFID.add(et.getAfId().get(et.getAuId().indexOf(AID)));
+			}
+		}
+
+		stopWatch.stopAndStart("分类返回数据");
+
+		List<Entity> etRefById = new ArrayList<Entity>();
+		//List<Entity> etWithSameAuthor = new ArrayList<Entity>();
+		// 第二次查询
+		// 2次查询
+		List<Long> et1rids = etId.getRId();
+		String evalateStatement = "";
+		if (et1rids != null && et1rids.size() > 0) {
+			evalateStatement = "Id=" + et1rids.get(0);
+			for (int i = 1; i < et1rids.size(); i++) {
+				evalateStatement = Or(evalateStatement, "Id=" + et1rids.get(i));
+			}
+		}
+		List<Long> et1auids = etId.getAuId();
+		if (et1auids != null && et1auids.size() > 0) {
+			String tEvalueStateMent = "AA.AuId=" + et1auids.get(0);
+			;
+			for (int i = 1; i < et1auids.size(); i++) {
+				tEvalueStateMent = Or(tEvalueStateMent, "AA.AuId=" + et1auids.get(i));
+			}
+			tEvalueStateMent = Composite(tEvalueStateMent);
+			if (evalateStatement.equals("")) {
+				evalateStatement = tEvalueStateMent;
+			} else {
+				evalateStatement = Or(evalateStatement, tEvalueStateMent);
+			}
+		}
+		Map<Long,Set<Long>> AFIDMap=new HashMap<Long, Set<Long>>();
+		if (!evalateStatement.equals("")) {
+			Map<String, String> paras2 = new HashMap<String, String>();
+			paras2.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId");
+			paras2.put("count", Integer.MAX_VALUE + "");
+			JSONObject json2 = MicrosoftAcademicAPI.evaluateMethod(evalateStatement, paras2);
+			ArrayList<Entity> entities2 = (ArrayList<Entity>) Entities.getEntityList(json2);
+			for (Entity et : entities2) {
+				if (et1rids.contains(et.getId())) {
+					etRefById.add(et);
+				}
+				if (et.getAuId() != null) {
+					for(int i=0;i<et.getAuId().size();i++){
+						long ttauid=et.getAuId().get(i);
+						long ttafid=et.getAfId().get(i);
+						if(et1auids.contains(ttauid)){
+							if(!AFIDMap.containsKey(ttauid)){
+								AFIDMap.put(ttauid, new HashSet<Long>());
+							}
+							AFIDMap.get(ttauid).add(ttafid);
+						}
+					}
+				}
+			}
+		}
+
+		stopWatch.stop("第二次分类返回数据");
+
+		if (etId == null || PagersWithSpecAuid.size() == 0)
+			return new ArrayList<String>();
+
+		// [Id,AA_AuId,]
+		if (PagersWithSpecAuid.contains(etId)) {
+			addResult("[" + ID + "," + AID + "]");
+		}
+		// [Id,RId,AA_AuId,]
+		for (Entity et : PagersWithSpecAuid) {
+			if (et.getAuId().contains(AID)) {
+				addResult("[" + ID + "," + et.getId() + "," + AID + "]");
+			}
+		}
+
+		// [Id,RId,RId,AA_AuId,]
+		// 这儿需要二次查询，到底查不查。另外有两种查询顺序，要根据直方图决定如何查。
+		List<Long> headids=getEntityIds(PagersWithSpecAuid);
+		for (Entity et : etRefById) {
+			if(et.getRId()!=null){
+				for(long trid:getCommItemAndOverrideFirst(et.getRId(), headids)){
+					addResult("[" + ID + "," + et.getId() + "," + trid + "," + AID + "]");
+				}
+			}
+		}
+		
+		// [Id,AA_AuId,AA_AfId,AA_AuId,]
+		if (AFIDMap.size() == 0) {
+			for (int i = 0; i < etId.getAuId().size(); i++) {
+				if (AFID.contains(etId.getAfId().get(i))) {
+					addResult("[" + ID + "," + etId.getAuId().get(i) + "," + etId.getAfId().get(i) + "," + AID + "]");
+				}
+			}
+		} else {
+			for(long taid:AFIDMap.keySet()){
+				AFIDMap.get(taid).retainAll(AFID);
+				for(long tafid:AFIDMap.get(taid)){
+					addResult("[" + ID + "," + taid + "," + tafid + "," + AID + "]");
+				}
+			}
+		}
+
+		// [Id,F_FId,Id,AA_AuId,]
+		// [Id,C_CId,Id,AA_AuId,]
+		// [Id,J_JId,Id,AA_AuId,]
+		// [Id,AA_AuId,Id,AA_AuId,]
+		for (Entity et : PagersWithSpecAuid) {
+			for (long tcomm : getCommItemAndOverrideFirst(et.getFId(), etId.getFId())) {
+				addResult("[" + ID + "," + tcomm + "," + et.getId() + "," + AID + "]");
+			}
+			for (long tcomm : getCommItemAndOverrideFirst(et.getAuId(), etId.getAuId())) {
+				addResult("[" + ID + "," + tcomm + "," + et.getId() + "," + AID + "]");
+			}
+			if (et.getCCId() != -1 && et.getCCId() == etId.getCCId()) {
+				addResult("[" + ID + "," + et.getCCId() + "," + et.getId() + "," + AID + "]");
+			}
+			if (et.getJJId() != -1 && et.getJJId() == etId.getJJId()) {
+				addResult("[" + ID + "," + et.getJJId() + "," + et.getId() + "," + AID + "]");
+			}
+		}
+
+		return endAndGetResult();
 	}
 
 	private List<String> getAuId2IdPath() {
@@ -241,13 +362,13 @@ public class Search {
 		long ID = tail;
 		startResult();
 		StopWatch stopWatch = new StopWatch();
-		JSONObject json;
-		JSONArray paths = new JSONArray();
+
 		Map<String, String> paras = new HashMap<String, String>();
 		paras.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId,RId");
 		paras.put("count", Integer.MAX_VALUE + "");
 		stopWatch.start();
-		json = MicrosoftAcademicAPI.evaluateMethod(Or(Or(Composite("AA.AuId=" + AID), "Id=" + ID), "RId=" + ID), paras);
+		JSONObject json = MicrosoftAcademicAPI
+				.evaluateMethod(Or(Or(Composite("AA.AuId=" + AID), "Id=" + ID), "RId=" + ID), paras);
 		// json = MicrosoftAcademicAPI.evaluateMethod(Or(Composite("AA.AuId=" +
 		// AID), "Id=" + ID), paras);
 		stopWatch.stop("查询");
