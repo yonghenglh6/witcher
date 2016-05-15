@@ -58,7 +58,7 @@ public class TestSearch {
 	public static void test1(){
 //		long AID1=2052648321L;
 //		long AID2=2041650587L;
-		long[] testCase=new long[]{2034912444,1511277043,20184837};
+		long[] testCase=new long[]{2147152072,1511277043};
 		List<String> rs=SearchWrapper.search( testCase[0],  testCase[testCase.length-1]);
 		
 	}
