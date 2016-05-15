@@ -127,7 +127,7 @@ public class Search {
 				evalateStatement = Or(evalateStatement, "Id=" + et1rids.get(i));
 			}
 		}
-		
+
 		if (!evalateStatement.equals("")) {
 			evalateStatement = Or(evalateStatement, "RId=" + ID2);
 		} else {
@@ -143,7 +143,7 @@ public class Search {
 				if (et1rids.contains(et.getId())) {
 					etRefByID1.add(et);
 				}
-				if(et.getId()==2013017122L){
+				if (et.getId() == 2013017122L) {
 					System.out.println(et.getRId());
 				}
 				if (et.getRId() != null && et.getRId().contains(ID2)) {
@@ -363,10 +363,8 @@ public class Search {
 		// [Id,RId,AA_AuId,]
 		if (etId.getRId() != null) {
 			List<Long> headids = getEntityIds(PagersWithSpecAuid);
-			for (Entity et : PagersWithSpecAuid) {
-				for (long trid : getCommItemAndOverrideFirst(headids, etId.getRId())) {
-					addResult("[" + ID + "," + trid + "," + AID + "]");
-				}
+			for (long trid : getCommItemAndOverrideFirst(headids, etId.getRId())) {
+				addResult("[" + ID + "," + trid + "," + AID + "]");
 			}
 		}
 		stopWatch.stopAndStart("[Id,RId,AA_AuId,]");
@@ -711,6 +709,6 @@ public class Search {
 	}
 
 	public static void main(String args[]) {
-
+		TestSearch.main(args);
 	}
 }

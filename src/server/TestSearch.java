@@ -56,7 +56,7 @@ public class TestSearch {
 	public static void test1(){
 //		long AID1=2052648321L;
 //		long AID2=2041650587L;
-		SearchWrapper.search( 1511277043,  1576962511);
+		SearchWrapper.search( 2122841972,1968481722 );
 	}
 	public static void id2id(){
 		long ID1=1511277043;
