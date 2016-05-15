@@ -73,8 +73,9 @@ public class MicrosoftAcademicClient {
 		return HttpClients.createDefault();
 
 	}
+	CloseableHttpClient httpclient;
 	private MicrosoftAcademicClient() {
-
+		httpclient = createSSLClientDefault();
 	}
 	public static String encodeParam(String param) {
 		try {
@@ -86,7 +87,7 @@ public class MicrosoftAcademicClient {
 	}
 
 	public String get(String url) {
-		CloseableHttpClient httpclient = createSSLClientDefault();
+		
 		HttpGet httpGet = new HttpGet();
 		try {
 			httpGet.setHeader("Ocp-Apim-Subscription-Key", KEY1);
@@ -117,12 +118,6 @@ public class MicrosoftAcademicClient {
 			if (response1 != null)
 				try {
 					response1.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			if(httpclient!=null)
-				try {
-					httpclient.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

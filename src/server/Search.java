@@ -59,6 +59,7 @@ public class Search {
 
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
+		stopWatch.stopAndStart("getId2IdPath===========================================");
 		startResult();
 
 		// 1次查询
@@ -67,7 +68,7 @@ public class Search {
 		paras1.put("count", Integer.MAX_VALUE + "");
 		JSONObject json1 = MicrosoftAcademicAPI.evaluateMethod(Or(Or("Id=" + ID1, "Id=" + ID2), "RId=" + ID2), paras1);
 
-		stopWatch.stopAndStart("query");
+		stopWatch.stopAndStart("1次查询");
 
 		List<Entity> entitys = Entities.getEntityList(json1);
 		ArrayList<Entity> etRefID2 = new ArrayList<Entity>();
@@ -84,7 +85,8 @@ public class Search {
 				etRefID2.add(et);
 			}
 		}
-
+		stopWatch.stopAndStart("1次整理结果");
+		// 所求不是指定的类型
 		if (etId1 == null || etId2 == null)
 			return new ArrayList<String>();
 
@@ -102,11 +104,12 @@ public class Search {
 			JSONObject json2 = MicrosoftAcademicAPI.evaluateMethod(evalateStatement, paras2);
 			etRefByID1 = (ArrayList<Entity>) Entities.getEntityList(json2);
 		}
-
+		stopWatch.stopAndStart("2次查询并整理结果");
 		// [Id,RId,]
 		if (etId1.getRId() != null && etId1.getRId().indexOf(etId2) != -1) {
 			addResult("[" + ID1 + "," + ID2 + "]");
 		}
+		stopWatch.stopAndStart("[Id,RId,]");
 		// [Id,RId,RId,]
 		if (etId1.getRId() != null) {
 			ArrayList<Long> comm = getEntityIds(etRefID2);
@@ -115,21 +118,21 @@ public class Search {
 				addResult("[" + ID1 + "," + trid + "," + ID2 + "]");
 			}
 		}
-
+		stopWatch.stopAndStart(" [Id,RId,RId,]");
 		// [Id,F_FId,Id,]
 		if (etId1.getFId() != null && etId2.getFId() != null) {
 			for (long tcomid : getCommItemWithNoChange(etId1.getFId(), etId2.getFId())) {
 				addResult("[" + ID1 + "," + tcomid + "," + ID2 + "]");
 			}
 		}
-
+		stopWatch.stopAndStart("[Id,F_FId,Id,]");
 		// [Id,C_CId,Id,]
 		if (etId1.getCCId() != -1 && etId2.getCCId() != -1) {
 			if (etId1.getCCId() == etId2.getCCId()) {
 				addResult("[" + ID1 + "," + etId1.getCCId() + "," + ID2 + "]");
 			}
 		}
-
+		stopWatch.stopAndStart("[Id,C_CId,Id,]");
 		// [Id,J_JId,Id,]
 
 		if (etId1.getJJId() != -1 && etId2.getJJId() != -1) {
@@ -137,13 +140,14 @@ public class Search {
 				addResult("[" + ID1 + "," + etId1.getJJId() + "," + ID2 + "]");
 			}
 		}
+		stopWatch.stopAndStart(" [Id,J_JId,Id,]");
 		// [Id,AA_AuId,Id,]
 		if (etId1.getAuId() != null && etId2.getAuId() != null) {
 			for (long tcomid : getCommItemWithNoChange(etId1.getAuId(), etId2.getAuId())) {
 				addResult("[" + ID1 + "," + tcomid + "," + ID2 + "]");
 			}
 		}
-
+		stopWatch.stopAndStart("[Id,AA_AuId,Id,]");
 		// [Id,RId,RId,RId,]
 		ArrayList<Long> tidrefByid2 = getEntityIds(etRefID2);
 		for (Entity et : etRefByID1) {
@@ -155,34 +159,35 @@ public class Search {
 				}
 			}
 		}
+		stopWatch.stopAndStart("[Id,RId,RId,RId,]");
 		// [Id,RId,F_FId,Id,]
 		for (Entity et : etRefByID1) {
 			for (long tcomid : getCommItemAndOverrideFirst(et.getFId(), etId2.getFId())) {
 				addResult("[" + ID1 + "," + et.getId() + "," + tcomid + "," + ID2 + "]");
 			}
 		}
-
+		stopWatch.stopAndStart("[Id,RId,F_FId,Id,]");
 		// [Id,RId,C_CId,Id,]
 		for (Entity et : etRefByID1) {
 			if (et.getCCId() != -1 && et.getCCId() == etId2.getCCId()) {
 				addResult("[" + ID1 + "," + et.getId() + "," + et.getCCId() + "," + ID2 + "]");
 			}
 		}
-
+		stopWatch.stopAndStart("[Id,RId,C_CId,Id,]");
 		// [Id,RId,J_JId,Id,]
 		for (Entity et : etRefByID1) {
 			if (et.getJJId() != -1 && et.getJJId() == etId2.getJJId()) {
 				addResult("[" + ID1 + "," + et.getId() + "," + et.getJJId() + "," + ID2 + "]");
 			}
 		}
-
+		stopWatch.stopAndStart("[Id,RId,J_JId,Id,]");
 		// [Id,RId,AA_AuId,Id,]
 		for (Entity et : etRefByID1) {
 			for (long tcomaid : getCommItemAndOverrideFirst(et.getAuId(), etId2.getAuId())) {
 				addResult("[" + ID1 + "," + et.getId() + "," + tcomaid + "," + ID2 + "]");
 			}
 		}
-
+		stopWatch.stopAndStart("[Id,RId,AA_AuId,Id,]");
 		// [Id,F_FId,Id,RId,]
 		// [Id,C_CId,Id,RId,]
 		// [Id,J_JId,Id,RId,]
@@ -201,6 +206,7 @@ public class Search {
 				addResult("[" + ID1 + "," + et.getJJId() + "," + et.getId() + "," + ID2 + "]");
 			}
 		}
+		stopWatch.stopAndStart("[Id,F_FId...,Id,RId,]");
 		return endAndGetResult();
 	}
 
@@ -211,7 +217,7 @@ public class Search {
 
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
-
+		stopWatch.stopAndStart("getId2AuIdPath===========================================");
 		// 第一次查询
 		Map<String, String> paras = new HashMap<String, String>();
 		paras.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId,RId");
@@ -222,8 +228,7 @@ public class Search {
 		stopWatch.stopAndStart("查询");
 		List<Entity> entitys = Entities.getEntityList(json);
 
-		stopWatch.stop("分析结果");
-		stopWatch.start();
+		stopWatch.stopAndStart("分析结果");
 		Entity etId = null;
 		List<Entity> PagersWithSpecAuid = new ArrayList<Entity>();
 
@@ -240,8 +245,13 @@ public class Search {
 
 		stopWatch.stopAndStart("分类返回数据");
 
+		// 所求不是指定的类型
+		if (etId == null || PagersWithSpecAuid.size() == 0)
+			return new ArrayList<String>();
+
 		List<Entity> etRefById = new ArrayList<Entity>();
-		//List<Entity> etWithSameAuthor = new ArrayList<Entity>();
+
+		// List<Entity> etWithSameAuthor = new ArrayList<Entity>();
 		// 第二次查询
 		// 2次查询
 		List<Long> et1rids = etId.getRId();
@@ -266,7 +276,8 @@ public class Search {
 				evalateStatement = Or(evalateStatement, tEvalueStateMent);
 			}
 		}
-		Map<Long,Set<Long>> AFIDMap=new HashMap<Long, Set<Long>>();
+		stopWatch.stopAndStart("2次查询");
+		Map<Long, Set<Long>> AFIDMap = new HashMap<Long, Set<Long>>();
 		if (!evalateStatement.equals("")) {
 			Map<String, String> paras2 = new HashMap<String, String>();
 			paras2.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId");
@@ -278,11 +289,11 @@ public class Search {
 					etRefById.add(et);
 				}
 				if (et.getAuId() != null) {
-					for(int i=0;i<et.getAuId().size();i++){
-						long ttauid=et.getAuId().get(i);
-						long ttafid=et.getAfId().get(i);
-						if(et1auids.contains(ttauid)){
-							if(!AFIDMap.containsKey(ttauid)){
+					for (int i = 0; i < et.getAuId().size(); i++) {
+						long ttauid = et.getAuId().get(i);
+						long ttafid = et.getAfId().get(i);
+						if (et1auids.contains(ttauid)) {
+							if (!AFIDMap.containsKey(ttauid)) {
 								AFIDMap.put(ttauid, new HashSet<Long>());
 							}
 							AFIDMap.get(ttauid).add(ttafid);
@@ -292,49 +303,50 @@ public class Search {
 			}
 		}
 
-		stopWatch.stop("第二次分类返回数据");
-
-		if (etId == null || PagersWithSpecAuid.size() == 0)
-			return new ArrayList<String>();
+		stopWatch.stop("2次分类");
 
 		// [Id,AA_AuId,]
 		if (PagersWithSpecAuid.contains(etId)) {
 			addResult("[" + ID + "," + AID + "]");
 		}
+		stopWatch.stopAndStart("[Id,AA_AuId,]");
 		// [Id,RId,AA_AuId,]
 		for (Entity et : PagersWithSpecAuid) {
 			if (et.getAuId().contains(AID)) {
 				addResult("[" + ID + "," + et.getId() + "," + AID + "]");
 			}
 		}
-
+		stopWatch.stopAndStart("[Id,RId,AA_AuId,]");
 		// [Id,RId,RId,AA_AuId,]
 		// 这儿需要二次查询，到底查不查。另外有两种查询顺序，要根据直方图决定如何查。
-		List<Long> headids=getEntityIds(PagersWithSpecAuid);
+		List<Long> headids = getEntityIds(PagersWithSpecAuid);
 		for (Entity et : etRefById) {
-			if(et.getRId()!=null){
-				for(long trid:getCommItemAndOverrideFirst(et.getRId(), headids)){
+			if (et.getRId() != null) {
+				for (long trid : getCommItemAndOverrideFirst(et.getRId(), headids)) {
 					addResult("[" + ID + "," + et.getId() + "," + trid + "," + AID + "]");
 				}
 			}
 		}
-		
+		stopWatch.stopAndStart("[Id,RId,RId,AA_AuId,]");
 		// [Id,AA_AuId,AA_AfId,AA_AuId,]
 		if (AFIDMap.size() == 0) {
-			for (int i = 0; i < etId.getAuId().size(); i++) {
-				if (AFID.contains(etId.getAfId().get(i))) {
-					addResult("[" + ID + "," + etId.getAuId().get(i) + "," + etId.getAfId().get(i) + "," + AID + "]");
+			if (etId.getAuId() != null) {
+				for (int i = 0; i < etId.getAuId().size(); i++) {
+					if (AFID.contains(etId.getAfId().get(i))) {
+						addResult(
+								"[" + ID + "," + etId.getAuId().get(i) + "," + etId.getAfId().get(i) + "," + AID + "]");
+					}
 				}
 			}
 		} else {
-			for(long taid:AFIDMap.keySet()){
+			for (long taid : AFIDMap.keySet()) {
 				AFIDMap.get(taid).retainAll(AFID);
-				for(long tafid:AFIDMap.get(taid)){
+				for (long tafid : AFIDMap.get(taid)) {
 					addResult("[" + ID + "," + taid + "," + tafid + "," + AID + "]");
 				}
 			}
 		}
-
+		stopWatch.stopAndStart("[Id,AA_AuId,AA_AfId,AA_AuId,]");
 		// [Id,F_FId,Id,AA_AuId,]
 		// [Id,C_CId,Id,AA_AuId,]
 		// [Id,J_JId,Id,AA_AuId,]
@@ -353,7 +365,7 @@ public class Search {
 				addResult("[" + ID + "," + et.getJJId() + "," + et.getId() + "," + AID + "]");
 			}
 		}
-
+		stopWatch.stopAndStart("[Id,F_FId...,Id,AA_AuId,]");
 		return endAndGetResult();
 	}
 
@@ -367,6 +379,7 @@ public class Search {
 		paras.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId,RId");
 		paras.put("count", Integer.MAX_VALUE + "");
 		stopWatch.start();
+		stopWatch.stopAndStart("getAuId2IdPath===========================================");
 		JSONObject json = MicrosoftAcademicAPI
 				.evaluateMethod(Or(Or(Composite("AA.AuId=" + AID), "Id=" + ID), "RId=" + ID), paras);
 		// json = MicrosoftAcademicAPI.evaluateMethod(Or(Composite("AA.AuId=" +
@@ -401,7 +414,12 @@ public class Search {
 		}
 
 		stopWatch.stop("分类返回数据");
+		// 所求不是指定的类型
+		if (PaperDest == null || PagersWithSpecAuid.size() == 0)
+			return new ArrayList<String>();
+
 		stopWatch.start();
+
 		// [AA_AuId,Id,]
 		for (Entity et : PagersWithSpecAuid) {
 			if (et.getId() == ID && et.getId() != -1) {
@@ -488,6 +506,7 @@ public class Search {
 
 	public void addResult(String item) {
 		result.add(item);
+		System.out.println(item);
 	}
 
 	public List<String> endAndGetResult() {
@@ -524,7 +543,7 @@ public class Search {
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
 		startResult();
-
+		stopWatch.stopAndStart("getAuId2AuIdPath===========================================");
 		Map<String, String> paras = new HashMap<String, String>();
 		paras.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId,RId");
 		paras.put("count", Integer.MAX_VALUE + "");
@@ -557,13 +576,18 @@ public class Search {
 			}
 		}
 		stopWatch.stopAndStart("整理结果");
+
+		// 所求不是指定的类型
+		if (PagersWithAuid1.size() == 0 || PagersWithAuid2.size() == 0)
+			return new ArrayList<String>();
+
 		// [AA_AuId,AA_AfId,AA_AuId,]
 		@SuppressWarnings("unchecked")
 		Set<Long> comAFID = (Set<Long>) AFID1.clone();
 		comAFID.retainAll(AFID2);
 		for (long s : comAFID) {
 			addResult("[" + AID1 + "," + s + "," + AID2 + "]");
-			System.out.println("[" + AID1 + "," + s + "," + AID2 + "]");
+			//System.out.println("[" + AID1 + "," + s + "," + AID2 + "]");
 		}
 		stopWatch.stopAndStart("[AA_AuId,AA_AfId,AA_AuId,]");
 		// [AA_AuId,Id,AA_AuId,]
@@ -571,7 +595,7 @@ public class Search {
 		comPaper.retainAll(PagersWithAuid2);
 		for (Entity et : comPaper) {
 			addResult("[" + AID1 + "," + et.getId() + "," + AID2 + "]");
-			System.out.println("[" + AID1 + "," + et.getId() + "," + AID2 + "]");
+			//System.out.println("[" + AID1 + "," + et.getId() + "," + AID2 + "]");
 		}
 		stopWatch.stopAndStart("[AA_AuId,Id,AA_AuId,]");
 		// [AA_AuId,Id,RId,AA_AuId,]
@@ -582,7 +606,7 @@ public class Search {
 				tRIDs.retainAll(idsWithAuid2);
 				for (long trid : tRIDs) {
 					addResult("[" + AID1 + "," + et.getId() + "," + trid + "," + AID2 + "]");
-					System.out.println("[" + AID1 + "," + et.getId() + "," + trid + "," + AID2 + "]");
+					//System.out.println("[" + AID1 + "," + et.getId() + "," + trid + "," + AID2 + "]");
 				}
 			}
 		}
