@@ -44,6 +44,7 @@ public class Dealer extends HttpServlet {
 //			String id1str = "2251253715", id2str = "2180737804";//auid2id 14
 			if (pmaps.get("id1") != null)
 				id1str = pmaps.get("id1")[0];
+			
 			if (pmaps.get("id2") != null)
 				id2str = pmaps.get("id2")[0];
 			long id1 = Long.valueOf(id1str);

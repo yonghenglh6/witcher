@@ -72,7 +72,16 @@ public class Search {
 			mrs.addAll(list4);
 			System.out.println("auid2auid:" + list4.size());
 		}
-		return mrs;
+		List<String> mmrs = new ArrayList<String>();
+		for(String item:mrs){
+			if(item.contains(","+head+",")||item.contains(","+tail+",")){
+				
+			}else{
+				mmrs.add(item);
+			}
+		}
+		
+		return mmrs;
 	}
 
 	TYPE ID1TYPE = null;
@@ -462,7 +471,7 @@ public class Search {
 						AFID.add(et.getAfId().get(tjid));
 				}
 			}
-			if (et.getRId() != null && et.getRId().indexOf(ID) != -1) {
+			if (et.getRId() != null && et.getRId().contains(ID)) {
 				PagersRefSpecId.add(et);
 			}
 		}
@@ -512,7 +521,7 @@ public class Search {
 		for (Entity et : PagersWithSpecAuid) {
 			if (et.getRId() != null) {
 				for (Entity et2 : PagersRefSpecId) {
-					if (et.getRId().indexOf(et2.getId()) != -1) {
+					if (et.getRId().contains(et2.getId())) {
 						addResult("[" + AID + "," + et.getId() + "," + et2.getId() + "," + ID + "]");
 						// System.out.println("[" + AID + "," + et.getId() + ","
 						// + et2.getId() + "," + ID + "]");
