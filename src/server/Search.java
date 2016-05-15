@@ -115,7 +115,6 @@ public class Search {
 		stopWatch.stopAndStart("1次整理结果");
 		// 所求不是指定的类型
 		if (etId1 == null || etId2 == null) {
-
 			return new ArrayList<String>();
 		}
 
@@ -128,6 +127,7 @@ public class Search {
 				evalateStatement = Or(evalateStatement, "Id=" + et1rids.get(i));
 			}
 		}
+		
 		if (!evalateStatement.equals("")) {
 			evalateStatement = Or(evalateStatement, "RId=" + ID2);
 		} else {
@@ -135,13 +135,16 @@ public class Search {
 		}
 		if (!evalateStatement.equals("")) {
 			Map<String, String> paras2 = new HashMap<String, String>();
-			paras2.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId");
+			paras2.put("attributes", "Id,F.FId,J.JId,C.CId,AA.AuId,AA.AfId,RId");
 			paras2.put("count", Integer.MAX_VALUE + "");
 			JSONObject json2 = MicrosoftAcademicAPI.evaluateMethod(evalateStatement, paras2);
 			ArrayList<Entity> entities2 = (ArrayList<Entity>) Entities.getEntityList(json2);
 			for (Entity et : entities2) {
 				if (et1rids.contains(et.getId())) {
 					etRefByID1.add(et);
+				}
+				if(et.getId()==2013017122L){
+					System.out.println(et.getRId());
 				}
 				if (et.getRId() != null && et.getRId().contains(ID2)) {
 					etRefID2.add(et);
@@ -150,7 +153,7 @@ public class Search {
 			stopWatch.stopAndStart("2次查询并整理结果");
 		}
 		// [Id,RId,]
-		if (etId1.getRId() != null && etId1.getRId().indexOf(etId2) != -1) {
+		if (etId1.getRId() != null && etId1.getRId().contains(ID2)) {
 			addResult("[" + ID1 + "," + ID2 + "]");
 		}
 		stopWatch.stopAndStart("[Id,RId,]");

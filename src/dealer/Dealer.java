@@ -49,7 +49,7 @@ public class Dealer extends HttpServlet {
 			long id1 = Long.valueOf(id1str);
 			long id2 = Long.valueOf(id2str);
 			List<String> mrs = SearchWrapper.search(id1,  id2);
-
+			
 			String rs = "[";
 			boolean first = true;
 			for (String tts : mrs) {
